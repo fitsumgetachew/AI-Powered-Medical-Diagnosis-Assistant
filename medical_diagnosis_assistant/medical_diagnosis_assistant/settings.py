@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
+import datetime
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -105,7 +107,23 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=600),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': datetime.timedelta(days=10),
+    'SLIDING_TOKEN_LIFETIME': datetime.timedelta(days=30),
+    'SLIDING_TOKEN_REFRESH_LIFETIME_LATE_USER': datetime.timedelta(days=1),
+    'SLIDING_TOKEN_LIFETIME_LATE_USER': datetime.timedelta(days=30),
+    'TOKEN_BLACKLIST': True,
+}
 
+# settings.py
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Use database-backed sessions
+SESSION_SAVE_EVERY_REQUEST = True
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
