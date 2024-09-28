@@ -245,7 +245,7 @@ SOCIAL_PASSWORD = 'this_is_social_password'
 def google_login(request):
     try:
         # body = json.loads(request.body.decode('utf-8'))
-        token = request.data.get('token')
+        token = request.data.get('google_token')
 
         response = requests.get(f'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token={token}')
         userinfo = response.json()
@@ -256,9 +256,9 @@ def google_login(request):
         email = userinfo.get('email')
         try:
             user = User.objects.get(email=email)
-            if user.is_validate:
+            if user.is_active:
                 token = get_tokens_for_user(user)
-                return Response({'refresh': token['refresh'], 'access': token['access'], 'is_admin':user.is_staff}, status=status.HTTP_200_OK)
+                return Response({'refresh': token['refresh'], 'access': token['access'], 'is_doctor':user.is_doctor}, status=status.HTTP_200_OK)
         except User.DoesNotExist:
             pass
 
@@ -276,7 +276,7 @@ def google_login(request):
 
             token = get_tokens_for_user(instance)
 
-            return Response({'refresh': token['refresh'], 'access': token['access'], 'is_admin':instance.is_staff}, status=status.HTTP_201_CREATED)
+            return Response({'refresh': token['refresh'], 'access': token['access'], 'is_doctor':instance.is_doctor}, status=status.HTTP_201_CREATED)
 
     except json.JSONDecodeError:
         return Response({'error': 'Invalid JSON'}, status=status.HTTP_400_BAD_REQUEST)
