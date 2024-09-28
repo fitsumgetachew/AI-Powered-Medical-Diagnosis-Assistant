@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - AI-Powered Medical Diagnosis Assistant</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">MediAI</div>
+        <div class="nav-links">
+            <a href="#">Home</a>
+
+        </div>
+    </nav>
+    <div class="login-container">
+        <h1>Login</h1>
+        <div class="google-btn" id="buttonDiv"></div>
+        <form id="loginForm">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+
+            <button type="submit">Login</button>
+        </form>
+        <div class="signup-link">
+            <p>Don't have an account? <a href="register.html">Sign up</a></p>
+        </div>
+        <div id="message" class="message" style="display: none;"></div>
+    </div>
+<script type="module" src="js/api.js"></script>
+<script type="module" src="js/auth.js"></script>
+</body>
+</html>

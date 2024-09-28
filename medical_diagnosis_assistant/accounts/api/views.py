@@ -171,7 +171,7 @@ def send_otp(request):
     try:
         email = request.data['email']
         sample_otp = 12345
-        subject = "OTP from Tok2dbs"
+        subject = "OTP from MedAI"
         message = f"your OTP is: {sample_otp}"
 
         queryset = User.objects.filter(email=email).exists()
@@ -238,7 +238,8 @@ def forget_password(request):
 
 
 
-GOOGLE_CLIENT_ID = '836345213785-1q2ra0i63cmdbs4jd6cjtro1j9ekcupf.apps.googleusercontent.com'
+GOOGLE_CLIENT_ID = '836345213785-7ahselh9p78a93lu7gofpb07venfcmba.apps.googleusercontent.com'
+
 SOCIAL_PASSWORD = 'this_is_social_password'
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
