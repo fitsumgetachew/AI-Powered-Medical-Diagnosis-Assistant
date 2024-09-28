@@ -1,0 +1,2 @@
+from rest_framework import serializers
+from symptom_analysis.model import Conversation
