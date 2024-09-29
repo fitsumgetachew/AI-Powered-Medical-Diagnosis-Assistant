@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - AI-Powered Medical Diagnosis Assistant</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">MediAI</div>
+        <div class="nav-links">
+            <a href="#">Home</a>
+            <a href="#">About</a>
+
+        </div>
+    </nav>
+    <div class="register-container">
+        <h1>Register</h1>
+        <div class="google-btn" id="buttonDiv"></div>
+        <form id="registerForm">
+            <label for="first_name">First Name:</label>
+            <input type="text" id="first_name" name="first_name" required>
+
+            <label for="last_name">Last Name:</label>
+            <input type="text" id="last_name" name="last_name" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+
+            <div class="otp-container">
+                <input type="text" id="otp" name="otp" placeholder="Enter OTP" required>
+                <button type="button" id="sendOtpBtn">Send OTP</button>
+            </div>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+
+            <label for="confirm_password">Confirm Password:</label>
+            <input type="password" id="confirm_password" name="confirm_password" required>
+
+            <div class="checkbox-container">
+                <input type="checkbox" id="is_doctor" name="is_doctor">
+                <label for="is_doctor">I am a doctor</label>
+            </div>
+
+            <button type="submit">Register</button>
+        </form>
+        <div class="login-link">
+            <p>Already have an account? <a href="login.html">Log in</a></p>
+        </div>
+        <div id="message" class="message" style="display: none;"></div>
+    </div>
+
+    <script type="module" src="js/api.js"></script>
+<script type="module" src="js/auth.js"></script>
+</body>
+</html>
