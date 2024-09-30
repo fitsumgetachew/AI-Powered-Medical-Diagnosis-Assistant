@@ -1,0 +1,130 @@
+.chat-container {
+  display: flex;
+  height: 100vh;
+}
+
+.sidebar {
+  width: 300px;
+  background-color: #f4f4f4;
+  border-right: 1px solid #ddd;
+  padding: 20px;
+}
+
+.sidebar-handle {
+  position: absolute;
+  left: -20px;
+  top: 50%;
+  width: 20px;
+  height: 40px;
+  background-color: #6366f1;
+  cursor: pointer;
+}
+
+.sidebar ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.sidebar li {
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #ddd;
+  transition: background-color 0.3s ease;
+}
+
+.sidebar li.active {
+  background-color: #e2e8f0;
+  font-weight: bold;
+}
+
+.chat-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-color: #ffffff;
+  padding: 20px;
+}
+
+.messages-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow-y: auto;
+  padding-bottom: 10px;
+}
+
+.message {
+  max-width: 60%;
+  padding: 10px;
+  margin: 10px;
+  border-radius: 10px;
+  word-wrap: break-word;
+}
+
+.user-message {
+  background-color: #e2e8f0;
+  align-self: flex-end;
+}
+
+.ai-message {
+  background-color: #bfdbfe;
+  align-self: flex-start;
+}
+
+.chatbox-input {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f4f4f4;
+  padding: 10px;
+  border-top: 1px solid #ddd;
+}
+
+.input-box {
+  width: 80%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  outline: none;
+}
+
+.send-button {
+  padding: 10px 20px;
+  margin-left: 10px;
+  background-color: #1e3a8a;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.send-button:hover {
+  background-color: #162e6f;
+}
+
+/* Modal for analysis */
+.analysis-modal {
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  transform: translate(-50%, -20%);
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 20px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+}
+
+.close-analysis {
+  background-color: #1e3a8a;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  border: none;
+}
+
+.close-analysis:hover {
+  background-color: #162e6f;
+}

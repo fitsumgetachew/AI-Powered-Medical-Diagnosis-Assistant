@@ -1,7 +1,37 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './AuthComponents.css'; // Import the stylesheet
+
+const API_BASE_URL = 'http://localhost:8000/';
+
+// Helper function to handle API requests
+async function sendRequest(endpoint, method = 'GET', data = null) {
+  const url = `${API_BASE_URL}${endpoint}`;
+  const headers = {
+    'Content-Type': 'application/json',
+  };
+
+  // Check if there's an access token and include it in headers
+  const token = localStorage.getItem('access_token');
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const options = {
+    method,
+    headers,
+    body: data ? JSON.stringify(data) : null,
+  };
+
+  try {
+    const response = await fetch(url, options);
+    const responseData = await response.json();
+    return { ok: response.ok, status: response.status, data: responseData };
+  } catch (error) {
+    console.error('API request error:', error);
+    return { ok: false, status: 500, data: { message: 'An error occurred while processing your request.' } };
+  }
+}
 
 // Login Component
 const Login = () => {
@@ -12,14 +42,17 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://127.0.0.1:8000/users/login/', { email, password });
-      localStorage.setItem('access_token', response.data.access);
-      localStorage.setItem('refresh_token', response.data.refresh);
-      localStorage.setItem('is_doctor', response.data.is_doctor);
-      navigate('/dashboard');
+      const response = await sendRequest('/users/login/', 'POST', { email, password });
+      if (response.ok) {
+        localStorage.setItem('access_token', response.data.access);
+        localStorage.setItem('refresh_token', response.data.refresh);
+        localStorage.setItem('is_doctor', response.data.is_doctor);
+        navigate('/dashboard');
+      } else {
+        alert('Login failed. Please check your credentials.');
+      }
     } catch (error) {
-      console.error('Login error:', error.response.data);
-      alert('Login failed. Please check your credentials.');
+      console.error('Login error:', error);
     }
   };
 
@@ -61,30 +94,36 @@ const Register = () => {
 
   const handleSendOtp = async () => {
     try {
-      await axios.post('http://127.0.0.1:8000/users/send_otp/', { email });
-      setOtpSent(true);
-      alert('OTP sent to your email.');
+      const response = await sendRequest('/users/send_otp/', 'POST', { email });
+      if (response.ok) {
+        setOtpSent(true);
+        alert('OTP sent to your email.');
+      } else {
+        alert('Failed to send OTP. Please try again.');
+      }
     } catch (error) {
-      console.error('OTP send error:', error.response.data);
-      alert('Failed to send OTP. Please try again.');
+      console.error('OTP send error:', error);
     }
   };
 
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://127.0.0.1:8000/users/register/', {
+      const response = await sendRequest('/users/register/', 'POST', {
         email,
         password,
         first_name: firstName,
         last_name: lastName,
-        otp
+        otp,
       });
-      alert('Account created successfully. Please login.');
-      navigate('/login');
+      if (response.ok) {
+        alert('Account created successfully. Please login.');
+        navigate('/login');
+      } else {
+        alert('Registration failed. Please check your information and try again.');
+      }
     } catch (error) {
-      console.error('Registration error:', error.response.data);
-      alert('Registration failed. Please check your information and try again.');
+      console.error('Registration error:', error);
     }
   };
 
@@ -147,35 +186,39 @@ const UserProfile = () => {
 
   const fetchProfile = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:8000/users/profile/', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
-      });
-      setProfile(response.data);
-      setFirstName(response.data.first_name);
-      setLastName(response.data.last_name);
+      const response = await sendRequest('/users/profile/', 'GET');
+      if (response.ok) {
+        setProfile(response.data);
+        setFirstName(response.data.first_name);
+        setLastName(response.data.last_name);
+      } else {
+        alert('Failed to fetch profile. Please try again.');
+      }
     } catch (error) {
-      console.error('Profile fetch error:', error.response.data);
-      alert('Failed to fetch profile. Please try again.');
+      console.error('Profile fetch error:', error);
     }
   };
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     try {
-      await axios.put('http://127.0.0.1:8000/users/profile/',
-        { first_name: firstName, last_name: lastName },
-        { headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` } }
-      );
-      alert('Profile updated successfully.');
-      setEditing(false);
-      fetchProfile();
+      const response = await sendRequest('/users/profile/', 'PUT', {
+        first_name: firstName,
+        last_name: lastName,
+      });
+      if (response.ok) {
+        alert('Profile updated successfully.');
+        setEditing(false);
+        fetchProfile();
+      } else {
+        alert('Failed to update profile. Please try again.');
+      }
     } catch (error) {
-      console.error('Profile update error:', error.response.data);
-      alert('Failed to update profile. Please try again.');
+      console.error('Profile update error:', error);
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchProfile();
   }, []);
 

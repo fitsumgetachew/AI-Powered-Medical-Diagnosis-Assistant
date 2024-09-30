@@ -8,10 +8,10 @@ function Header() {
       <nav className="navbar">
         <div className="logo">MediAI</div>
         <div className="nav-links">
-          <Link to="/">Dashboard</Link>
+          <Link to="/dashboard">Dashboard</Link>
           <Link to="/medical-image">Medical Image Analysis</Link>
           <Link to="/symptom-analysis">Symptom Analysis</Link>
-          <Link to="/drug-interaction">Drug Interaction</Link>
+          <Link to="/prescription">Prescription</Link>
         </div>
         <div className="user-actions">
           <Link to="/profile">Profile</Link>
