@@ -8,7 +8,7 @@ class MedicalImage(models.Model):
         ('MRI', 'MRI'),
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     image = models.ImageField(upload_to='medical_images/')
     image_type = models.CharField(max_length=4, choices=IMAGE_TYPES)
     body_part = models.CharField(max_length=50)

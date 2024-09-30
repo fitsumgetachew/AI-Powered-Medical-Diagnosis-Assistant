@@ -1,0 +1,51 @@
+nav.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--primary-color); /* Use your primary color for the background */
+    padding: 1rem 2rem; /* Adjust padding as needed */
+    color: white; /* White text for better visibility */
+}
+
+.logo {
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+.nav-links {
+    display: flex;
+    gap: 2rem; /* Space between links */
+}
+
+.nav-links a {
+    color: white; /* White text for better visibility */
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+    color: var(--secondary-color); /* Change to secondary color on hover */
+}
+
+.user-actions {
+    display: flex;
+    gap: 1rem; /* Space between profile and login links */
+}
+
+.user-actions a.button {
+    background-color: var(--secondary-color); /* Secondary color for buttons */
+    color: white; /* White text for better visibility */
+    padding: 0.5rem 1rem; /* Button padding */
+    border-radius: 5px; /* Rounded corners */
+    text-decoration: none; /* Remove underline */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Transitions for effects */
+}
+
+.user-actions a.button:hover {
+    background-color: var(--secondary-dark); /* Darken button color on hover */
+    transform: translateY(-2px); /* Slight lift effect on hover */
+}
+
+.user-actions a.button:active {
+    transform: translateY(0); /* Reset position on active state */
+}
