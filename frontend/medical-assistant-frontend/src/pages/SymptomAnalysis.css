@@ -1,0 +1,71 @@
+:root {
+  --primary-color: #1e3a8a;
+  --secondary-color: #6366f1;
+  --bg-color: #f8fafc;
+  --text-color: #333;
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+}
+
+.bg-primary {
+  background-color: var(--primary-color);
+}
+
+.bg-secondary {
+  background-color: var(--secondary-color);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.chat-box {
+  flex-grow: 1;
+  background-color: white;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.chat-messages {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.message {
+  margin-bottom: 10px;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.user-message {
+  background-color: #e2e8f0;
+  text-align: right;
+}
+
+.ai-message {
+  background-color: #bfdbfe;
+  text-align: left;
+}
+
+.input-container {
+  margin-top: 1rem;
+}
+
+button {
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+.fixed {
+  position: fixed;
+}
