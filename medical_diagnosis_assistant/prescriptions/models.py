@@ -11,22 +11,16 @@ class Drug(models.Model):
         return self.name
 
 class Prescription(models.Model):
-    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
+    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, null=True)
     patient = models.ForeignKey(User, on_delete=models.CASCADE)
     diagnosis = models.TextField()
+    drugs = models.ManyToManyField(Drug)
+    dosage = models.CharField(max_length=100, null=True)
+    frequency = models.CharField(max_length=100, null=True)
+    duration = models.CharField(max_length=100, null=True)
+    instructions = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    valid_until = models.DateTimeField()
+    valid_until = models.DateTimeField(null=True)
 
     def __str__(self):
         return f"Prescription for {self.patient.email} by Dr. {self.doctor.user.last_name}"
-
-class PrescriptionDrug(models.Model):
-    prescription = models.ForeignKey(Prescription, on_delete=models.CASCADE)
-    drug = models.ForeignKey(Drug, on_delete=models.CASCADE)
-    dosage = models.CharField(max_length=100)
-    frequency = models.CharField(max_length=100)
-    duration = models.CharField(max_length=100)
-    instructions = models.TextField()
-
-    def __str__(self):
-        return f"{self.drug.name} for {self.prescription}"

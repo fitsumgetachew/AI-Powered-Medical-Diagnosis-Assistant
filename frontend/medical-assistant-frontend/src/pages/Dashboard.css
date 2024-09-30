@@ -1,0 +1,66 @@
+/* Dashboard.css */
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive grid */
+    gap: 2rem; /* Space between cards */
+    padding: 2rem; /* Outer padding */
+    background-color: var(--bg-color); /* Background color */
+    width: 100%; /* Ensure full width */
+}
+
+.dashboard-card {
+    background-color: var(--card-bg); /* Card background color */
+    padding: 1.5rem; /* Inner padding */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transitions */
+    text-align: center; /* Center text inside cards */
+    overflow: hidden; /* Prevent overflow */
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px); /* Lift card on hover */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Deeper shadow on hover */
+}
+
+.dashboard-card h2 {
+    color: var(--primary-color); /* Heading color */
+    margin-bottom: 1rem; /* Space below heading */
+}
+
+.dashboard-card ul {
+    list-style: none; /* Remove default list styling */
+    padding: 0; /* Remove default padding */
+    margin: 0 0 1.5rem; /* Space below list */
+}
+
+.dashboard-card ul li {
+    margin-bottom: 0.5rem; /* Space between list items */
+}
+
+.dashboard-card a {
+    display: inline-block; /* Ensure it can take padding */
+    background-color: var(--primary-color); /* Button background color */
+    color: white; /* Button text color */
+    padding: 0.8rem 1.5rem; /* Button padding */
+    border-radius: 5px; /* Rounded corners for button */
+    text-decoration: none; /* Remove underline */
+    font-weight: bold; /* Bold text */
+    transition: background-color 0.3s ease; /* Smooth background transition */
+    cursor: pointer; /* Pointer cursor on hover */
+}
+
+.dashboard-card a:hover {
+    background-color: var(--primary-dark); /* Darker color on hover */
+}
+
+/* Optional: Media query for mobile responsiveness */
+@media (max-width: 600px) {
+    .dashboard {
+        padding: 1rem; /* Reduce padding on smaller screens */
+    }
+
+    .dashboard-card {
+        padding: 1rem; /* Adjust card padding for smaller screens */
+    }
+}
