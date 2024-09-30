@@ -1,275 +1,163 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediAI - Your AI-Powered Medical Assistant</title>
-    <style>
-        :root {
-            --primary-color: #3498db;
-            --secondary-color: #2ecc71;
-            --text-color: #333;
-            --bg-color: #f4f4f4;
-            --card-bg: #ffffff;
-        }
+{% extends "base.html" %}
 
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-        }
+{% block title %}MediAI - Dashboard{% endblock %}
 
-        header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 1rem;
-            text-align: center;
-        }
+{% block extra_styles %}
+<style>
+    .dashboard {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    }
 
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            background-color: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
+    .dashboard-card {
+        background-color: var(--card-bg);
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        padding: 1.5rem;
+        transition: transform 0.3s ease;
+    }
 
-        .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+    }
 
-        .nav-links {
-            display: flex;
-            align-items: center;
-        }
+    .dashboard-card h2 {
+        color: var(--primary-color);
+        margin-top: 0;
+    }
 
-        .nav-links a {
-            color: var(--text-color);
-            text-decoration: none;
-            margin-left: 1rem;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
+    .history-item {
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #eee;
+    }
 
-        .nav-links a:hover {
-            background-color: var(--primary-color);
-            color: white;
-        }
+    .history-item:last-child {
+        border-bottom: none;
+    }
 
-        .user-actions {
-            display: flex;
-            align-items: center;
-        }
+    .cta-button {
+        display: inline-block;
+        background-color: var(--primary-color);
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+    }
 
-        .user-actions a {
-            color: var(--text-color);
-            text-decoration: none;
-            margin-left: 1rem;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
+    .cta-button:hover {
+        background-color: var(--secondary-color);
+    }
+</style>
+{% endblock %}
 
-        .user-actions a:hover {
-            background-color: var(--secondary-color);
-            color: white;
-        }
-
-        main {
-            padding: 2rem;
-        }
-
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-
-        .dashboard-card {
-            background-color: var(--card-bg);
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            padding: 1.5rem;
-            transition: transform 0.3s ease;
-        }
-
-        .dashboard-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .dashboard-card h2 {
-            color: var(--primary-color);
-            margin-top: 0;
-        }
-
-        .history-item {
-            margin-bottom: 1rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #eee;
-        }
-
-        .history-item:last-child {
-            border-bottom: none;
-        }
-
-        .cta-button {
-            display: inline-block;
-            background-color: var(--primary-color);
-            color: white;
-            padding: 0.8rem 1.5rem;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: background-color 0.3s ease;
-        }
-
-        .cta-button:hover {
-            background-color: var(--secondary-color);
-        }
-
-        footer {
-            background-color: var(--text-color);
-            color: white;
-            text-align: center;
-
-            padding: 1rem;
-            margin-bottom: ;
-        }
-    </style>
-</head>
-<body>
-    <nav>
-        <div class="logo">MediAI</div>
-        <div class="nav-links">
-            <a href="#dashboard">Dashboard</a>
-            <a href="#medical-image">Medical Image Analysis</a>
-            <a href="chatbot.html">Symptom Analysis</a>
-            <a href="#drug-interaction">Drug Interaction</a>
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <section id="dashboard" class="dashboard">
+        <div class="dashboard-card">
+            <h2 class="text-2xl font-bold mb-4">Recent Medical Image Analyses</h2>
+            <div class="history-item">
+                <p><strong>Date:</strong> <span id="image-date-1">2024-09-25</span></p>
+                <p><strong>Type:</strong> <span id="image-type-1">X-ray</span></p>
+                <p><strong>Result:</strong> <span id="image-result-1">No abnormalities detected</span></p>
+            </div>
+            <div class="history-item">
+                <p><strong>Date:</strong> <span id="image-date-2">2024-09-20</span></p>
+                <p><strong>Type:</strong> <span id="image-type-2">CT Scan</span></p>
+                <p><strong>Result:</strong> <span id="image-result-2">Minor irregularities found</span></p>
+            </div>
+            <a href="#medical-image" class="cta-button">New Analysis</a>
         </div>
-        <div class="user-actions">
-            <a href="#profile">Profile</a>
-            <a href="#logout">Logout</a>
+
+        <div class="dashboard-card">
+            <h2 class="text-2xl font-bold mb-4">Recent Symptom Analyses</h2>
+            <div class="history-item">
+                <p><strong>Date:</strong> <span id="symptom-date-1">2024-09-27</span></p>
+                <p><strong>Symptoms:</strong> <span id="symptom-list-1">Headache, Fever</span></p>
+                <p><strong>Suggested Condition:</strong> <span id="symptom-condition-1">Common Cold</span></p>
+            </div>
+            <div class="history-item">
+                <p><strong>Date:</strong> <span id="symptom-date-2">2024-09-22</span></p>
+                <p><strong>Symptoms:</strong> <span id="symptom-list-2">Cough, Shortness of breath</span></p>
+                <p><strong>Suggested Condition:</strong> <span id="symptom-condition-2">Bronchitis</span></p>
+            </div>
+            <a href="/chatbot" class="cta-button">New Analysis</a>
         </div>
-    </nav>
 
-    <main>
-        <section id="dashboard" class="dashboard">
-            <div class="dashboard-card">
-                <h2>Recent Medical Image Analyses</h2>
-                <div class="history-item">
-                    <p><strong>Date:</strong> <span id="image-date-1">2024-09-25</span></p>
-                    <p><strong>Type:</strong> <span id="image-type-1">X-ray</span></p>
-                    <p><strong>Result:</strong> <span id="image-result-1">No abnormalities detected</span></p>
-                </div>
-                <div class="history-item">
-                    <p><strong>Date:</strong> <span id="image-date-2">2024-09-20</span></p>
-                    <p><strong>Type:</strong> <span id="image-type-2">CT Scan</span></p>
-                    <p><strong>Result:</strong> <span id="image-result-2">Minor irregularities found</span></p>
-                </div>
-                <a href="#medical-image" class="cta-button">New Analysis</a>
+        <div class="dashboard-card">
+            <h2 class="text-2xl font-bold mb-4">Recent Prescriptions</h2>
+            <div class="history-item">
+                <p><strong>Date:</strong> <span id="prescription-date-1">2024-09-26</span></p>
+                <p><strong>Medication:</strong> <span id="prescription-med-1">Amoxicillin</span></p>
+                <p><strong>Dosage:</strong> <span id="prescription-dosage-1">500mg, 3 times daily</span></p>
             </div>
-
-            <div class="dashboard-card">
-                <h2>Recent Symptom Analyses</h2>
-                <div class="history-item">
-                    <p><strong>Date:</strong> <span id="symptom-date-1">2024-09-27</span></p>
-                    <p><strong>Symptoms:</strong> <span id="symptom-list-1">Headache, Fever</span></p>
-                    <p><strong>Suggested Condition:</strong> <span id="symptom-condition-1">Common Cold</span></p>
-                </div>
-                <div class="history-item">
-                    <p><strong>Date:</strong> <span id="symptom-date-2">2024-09-22</span></p>
-                    <p><strong>Symptoms:</strong> <span id="symptom-list-2">Cough, Shortness of breath</span></p>
-                    <p><strong>Suggested Condition:</strong> <span id="symptom-condition-2">Bronchitis</span></p>
-                </div>
-                <a href="chatbot.html" class="cta-button">New Analysis</a>
+            <div class="history-item">
+                <p><strong>Date:</strong> <span id="prescription-date-2">2024-09-21</span></p>
+                <p><strong>Medication:</strong> <span id="prescription-med-2">Ibuprofen</span></p>
+                <p><strong>Dosage:</strong> <span id="prescription-dosage-2">400mg, as needed</span></p>
             </div>
+            <a href="#drug-interaction" class="cta-button">New Prescription</a>
+        </div>
+    </section>
+</div>
+{% endblock %}
 
-            <div class="dashboard-card">
-                <h2>Recent Prescriptions</h2>
-                <div class="history-item">
-                    <p><strong>Date:</strong> <span id="prescription-date-1">2024-09-26</span></p>
-                    <p><strong>Medication:</strong> <span id="prescription-med-1">Amoxicillin</span></p>
-                    <p><strong>Dosage:</strong> <span id="prescription-dosage-1">500mg, 3 times daily</span></p>
-                </div>
-                <div class="history-item">
-                    <p><strong>Date:</strong> <span id="prescription-date-2">2024-09-21</span></p>
-                    <p><strong>Medication:</strong> <span id="prescription-med-2">Ibuprofen</span></p>
-                    <p><strong>Dosage:</strong> <span id="prescription-dosage-2">400mg, as needed</span></p>
-                </div>
-                <a href="#drug-interaction" class="cta-button">New Prescription</a>
-            </div>
-        </section>
-    </main>
+{% block scripts %}
+<script>
+    function fetchDashboardData() {
+        // Simulating API calls
+        // In a real application, you would fetch this data from your backend
+        const imageAnalyses = [
+            { date: '2024-09-25', type: 'X-ray', result: 'No abnormalities detected' },
+            { date: '2024-09-20', type: 'CT Scan', result: 'Minor irregularities found' }
+        ];
 
-    <footer>
-        <p>&copy; 2024 AI-Powered Medical Diagnosis Assistant. All rights reserved.</p>
-    </footer>
+        const symptomAnalyses = [
+            { date: '2024-09-27', symptoms: 'Headache, Fever', condition: 'Common Cold' },
+            { date: '2024-09-22', symptoms: 'Cough, Shortness of breath', condition: 'Bronchitis' }
+        ];
 
-    <script>
-        // This script would typically fetch data from your APIs and populate the dashboard
-        // For demonstration purposes, we'll use placeholder data
+        const prescriptions = [
+            { date: '2024-09-26', medication: 'Amoxicillin', dosage: '500mg, 3 times daily' },
+            { date: '2024-09-21', medication: 'Ibuprofen', dosage: '400mg, as needed' }
+        ];
 
-        function fetchDashboardData() {
-            // Simulating API calls
-            // In a real application, you would fetch this data from your backend
-            const imageAnalyses = [
-                { date: '2024-09-25', type: 'X-ray', result: 'No abnormalities detected' },
-                { date: '2024-09-20', type: 'CT Scan', result: 'Minor irregularities found' }
-            ];
+        updateDashboard(imageAnalyses, symptomAnalyses, prescriptions);
+    }
 
-            const symptomAnalyses = [
-                { date: '2024-09-27', symptoms: 'Headache, Fever', condition: 'Common Cold' },
-                { date: '2024-09-22', symptoms: 'Cough, Shortness of breath', condition: 'Bronchitis' }
-            ];
+    function updateDashboard(imageAnalyses, symptomAnalyses, prescriptions) {
+        // Update Medical Image Analyses
+        document.getElementById('image-date-1').textContent = imageAnalyses[0].date;
+        document.getElementById('image-type-1').textContent = imageAnalyses[0].type;
+        document.getElementById('image-result-1').textContent = imageAnalyses[0].result;
 
-            const prescriptions = [
-                { date: '2024-09-26', medication: 'Amoxicillin', dosage: '500mg, 3 times daily' },
-                { date: '2024-09-21', medication: 'Ibuprofen', dosage: '400mg, as needed' }
-            ];
+        document.getElementById('image-date-2').textContent = imageAnalyses[1].date;
+        document.getElementById('image-type-2').textContent = imageAnalyses[1].type;
+        document.getElementById('image-result-2').textContent = imageAnalyses[1].result;
 
-            updateDashboard(imageAnalyses, symptomAnalyses, prescriptions);
-        }
+        // Update Symptom Analyses
+        document.getElementById('symptom-date-1').textContent = symptomAnalyses[0].date;
+        document.getElementById('symptom-list-1').textContent = symptomAnalyses[0].symptoms;
+        document.getElementById('symptom-condition-1').textContent = symptomAnalyses[0].condition;
 
-        function updateDashboard(imageAnalyses, symptomAnalyses, prescriptions) {
-            // Update Medical Image Analyses
-            document.getElementById('image-date-1').textContent = imageAnalyses[0].date;
-            document.getElementById('image-type-1').textContent = imageAnalyses[0].type;
-            document.getElementById('image-result-1').textContent = imageAnalyses[0].result;
+        document.getElementById('symptom-date-2').textContent = symptomAnalyses[1].date;
+        document.getElementById('symptom-list-2').textContent = symptomAnalyses[1].symptoms;
+        document.getElementById('symptom-condition-2').textContent = symptomAnalyses[1].condition;
 
-            document.getElementById('image-date-2').textContent = imageAnalyses[1].date;
-            document.getElementById('image-type-2').textContent = imageAnalyses[1].type;
-            document.getElementById('image-result-2').textContent = imageAnalyses[1].result;
+        // Update Prescriptions
+        document.getElementById('prescription-date-1').textContent = prescriptions[0].date;
+        document.getElementById('prescription-med-1').textContent = prescriptions[0].medication;
+        document.getElementById('prescription-dosage-1').textContent = prescriptions[0].dosage;
 
-            // Update Symptom Analyses
-            document.getElementById('symptom-date-1').textContent = symptomAnalyses[0].date;
-            document.getElementById('symptom-list-1').textContent = symptomAnalyses[0].symptoms;
-            document.getElementById('symptom-condition-1').textContent = symptomAnalyses[0].condition;
+        document.getElementById('prescription-date-2').textContent = prescriptions[1].date;
+        document.getElementById('prescription-med-2').textContent = prescriptions[1].medication;
+        document.getElementById('prescription-dosage-2').textContent = prescriptions[1].dosage;
+    }
 
-            document.getElementById('symptom-date-2').textContent = symptomAnalyses[1].date;
-            document.getElementById('symptom-list-2').textContent = symptomAnalyses[1].symptoms;
-            document.getElementById('symptom-condition-2').textContent = symptomAnalyses[1].condition;
-
-            // Update Prescriptions
-            document.getElementById('prescription-date-1').textContent = prescriptions[0].date;
-            document.getElementById('prescription-med-1').textContent = prescriptions[0].medication;
-            document.getElementById('prescription-dosage-1').textContent = prescriptions[0].dosage;
-
-            document.getElementById('prescription-date-2').textContent = prescriptions[1].date;
-            document.getElementById('prescription-med-2').textContent = prescriptions[1].medication;
-            document.getElementById('prescription-dosage-2').textContent = prescriptions[1].dosage;
-        }
-
-        // Call this function when the page loads
-        fetchDashboardData();
-    </script>
-</body>
-</html>
+    // Call this function when the page loads
+    fetchDashboardData();
+</script>
+{% endblock %}

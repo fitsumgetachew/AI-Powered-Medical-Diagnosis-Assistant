@@ -10,7 +10,7 @@ we will have follwing features
 ## Symptom Analysis 
 - this feature is for both patient and doctors also we provide it in the form of chatbot using LLMs so they can interact with the system to get more information about users condition or patients their own condition
   - then if it's for patient we ask confirmation to save the conversation as their history and we save and share this information in the future to for patient data analysis and share for other doctors
-  ## Drug Interaction
+  ## Prescription
   - here is specially for doctors where doctors will upload patient result information report or write the condition directly then we give detail information about the drug description and way of taking the drug like dossage and some detail what we suppose to take or not with the mediciene
   - and will have a feature to download the last result in pdf fromat as prescription
 

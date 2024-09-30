@@ -5,18 +5,20 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.shortcuts import get_object_or_404
-from symptom_analysis.models import Conversation, SymptomAnalysis
+from symptom_analysis.models import Conversation, SymptomAnalysis, Symptom
 from .serializers import (
     ConversationSerializer,
     ConversationListSerializer,
     SymptomAnalysisSerializer,
     ConversationDetailSerializer
 )
-from .utils import symptom_analyzer , analysis_result_chain, generate_conversation_name
+from .utils import symptom_analyzer , analysis_result_chain, generate_conversation_name, extract_symptoms_from_text
+from patient_records.models import PatientHistory
+
 
 class ChatResponseView(APIView):
-    # authentication_classes = [JWTAuthentication]
-    # permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         conversation_id = request.data.get('conversation_id')
@@ -46,8 +48,8 @@ class ChatResponseView(APIView):
 
 
 class ConversationListView(APIView):
-    # authentication_classes = [JWTAuthentication]
-    # permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         conversations = Conversation.objects.all()#filter(user=request.user)
@@ -56,8 +58,8 @@ class ConversationListView(APIView):
 
 
 class ConversationDetailView(APIView):
-    # authentication_classes = [JWTAuthentication]
-    # permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, conversation_id):
         conversation = get_object_or_404(Conversation, pk=conversation_id)
@@ -66,12 +68,11 @@ class ConversationDetailView(APIView):
 
 
 class AnalyzeSymptomView(APIView):
-    # authentication_classes = [JWTAuthentication]
-    # permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         conversation_id = request.data.get('conversation_id')
-        print("conversaion", conversation_id)
         conversation = get_object_or_404(Conversation, pk=conversation_id)
 
         conversation_history = {
@@ -80,15 +81,43 @@ class AnalyzeSymptomView(APIView):
         }
 
         analysis_result = analysis_result_chain(conversation_history)
+        symptoms = extract_symptoms_from_text(conversation_history['user_message'])
+
+        symptom_objects = []
+        for symptom_name in symptoms:
+            symptom, created = Symptom.objects.get_or_create(name=symptom_name)
+            symptom_objects.append(symptom)
 
         symptom_analysis, created = SymptomAnalysis.objects.get_or_create(
+            user=request.user,
             conversation=conversation,
             defaults={'analysis_result': analysis_result}
         )
-
         if not created:
             symptom_analysis.analysis_result = analysis_result
             symptom_analysis.save()
 
+        symptom_analysis.symptoms.set(symptom_objects)
+
         serializer = SymptomAnalysisSerializer(symptom_analysis)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class SaveToHistoryView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        symptom_analysis_id = request.data.get('symptom_analysis_id')
+
+
+        symptom_analysis = get_object_or_404(SymptomAnalysis, id=symptom_analysis_id)
+
+        patient_history = PatientHistory.objects.create(
+            patient=user,
+            symptom_analysis=symptom_analysis,
+
+        )
+
+        return Response({'status': 'History saved successfully'}, status=status.HTTP_201_CREATED)

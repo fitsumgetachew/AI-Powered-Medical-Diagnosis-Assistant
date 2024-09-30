@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from accounts.models import User, OtpModel
+from accounts.models import User, OtpModel, Doctor
 
 from django.contrib.auth.hashers import check_password
 import secrets
@@ -27,40 +27,28 @@ from rest_framework.exceptions import ValidationError
 def create_account(request):
     try:
         receiver_email = request.data['email']
-        print("otp" ,request.data.get('otp' , None))
-        if not request.data.get('otp' , None):
-
-            return Response({"message": "verify your email by sending  otp first"}, status=400)
+        if not request.data.get('otp', None):
+            return Response({"message": "verify your email by sending otp first"}, status=400)
 
         user_serializer = CreateUserSerializer(data=request.data)
 
         if user_serializer.is_valid(raise_exception=True):
             try:
-
                 otp_obj = OtpModel.objects.get(email=receiver_email)
             except OtpModel.DoesNotExist:
-
-                return Response({"message": "verify your email by sending  otp first"}, status=400)
-
-            print("data is validated")
-
+                return Response({"message": "verify your email by sending otp first"}, status=400)
 
             if otp_obj.otp == request.data['otp']:
-
-                instance  = user_serializer.save()
-
+                instance = user_serializer.save()
                 return Response({"message": "account created successfully"}, status=200)
             else:
-
                 return Response({"message": "enter correct otp"}, status=400)
 
     except ValidationError as e:
-        # Handle the validation error explicitly
         return Response({"message": e.detail}, status=400)
-
     except Exception as e:
-        # Handle any other exceptions
         return Response({"message": str(e)}, status=500)
+
 
 
 @api_view(['POST'])
@@ -112,7 +100,7 @@ def logout(request):
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET','PUT' , 'PATCH'])
+@api_view(['GET', 'PUT', 'PATCH'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([permissions.IsAuthenticated])
 def user_profile(request):
@@ -120,24 +108,26 @@ def user_profile(request):
         user_obj = request.user
 
         if request.method == 'GET':
-
-            data = UserProfileSerialize(user_obj, many = False).data
+            data = UserProfileSerialize(user_obj, many=False).data
             return Response(data)
 
-        elif request.method in ['PUT' , 'PATCH']:
+        elif request.method in ['PUT', 'PATCH']:
+            serializer = UserProfileSerialize(data=request.data, partial=True)  # Allow partial updates
 
-            serializer = UserProfileSerialize(data = request.data)
-
-            if serializer.is_valid(raise_exception = True):
-                serializer.update(user_obj , request.data)
+            if serializer.is_valid(raise_exception=True):
+                serializer.update(user_obj, request.data)
 
                 return Response(
-                    {'detail' : 'Profile updated successfully.'},
-                    status= status.HTTP_200_OK
+                    {'detail': 'Profile updated successfully.'},
+                    status=status.HTTP_200_OK
                 )
     except ValidationError as e:
-        # Handle the validation error explicitly
         return Response({"message": e.detail}, status=400)
+
+    except Doctor.DoesNotExist:
+        # Handle the case where a doctor profile does not exist
+        return Response({"message": "Doctor profile does not exist"}, status=404)
+
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])

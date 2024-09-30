@@ -1,210 +1,156 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediAI - Symptom Analysis Chatbot</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
-</head>
+{% extends "base.html" %}
+
+{% block title %}MediAI - Symptom Analysis Chatbot{% endblock %}
+
+{% block extra_styles %}
 <style>
-body {
-    font-family: 'Arial', sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    margin: 0;
-    padding: 0;
-}
+    .chat-container {
+        height: calc(100vh - 220px);
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: var(--primary-color) var(--bg-color);
+    }
 
-.bg-primary {
-    background-color: var(--primary-color);
-}
+    .chat-container::-webkit-scrollbar {
+        width: 8px;
+    }
 
-.bg-primary-dark {
-    background-color: var(--primary-dark);
-}
+    .chat-container::-webkit-scrollbar-track {
+        background: var(--bg-color);
+    }
 
-.bg-secondary {
-    background-color: var(--secondary-color);
-}
+    .chat-container::-webkit-scrollbar-thumb {
+        background-color: var(--primary-color);
+        border-radius: 4px;
+    }
 
-.bg-secondary-dark {
-    background-color: var(--secondary-dark);
-}
+    .message {
+        max-width: 70%;
+        margin-bottom: 20px;
+        padding: 15px;
+        border-radius: 20px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
 
-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
-    background-color: var(--primary-color);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
+    .user-message {
+        background-color: #e2e8f0;
+        align-self: flex-end;
+        border-bottom-right-radius: 5px;
+    }
 
-.logo {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: white;
-}
+    .ai-message {
+        background-color: #bfdbfe;
+        color: #1e3a8a;
+        align-self: flex-start;
+        border-bottom-left-radius: 5px;
+    }
 
-.nav-links, .user-actions {
-    display: flex;
-    align-items: center;
-}
+    .sidebar {
+        position: fixed;
+        left: -250px;
+        top: 64px;
+        bottom: 0;
+        width: 250px;
+        background-color: var(--card-bg);
+        transition: left 0.3s ease-in-out;
+        z-index: 1000;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    }
 
-.nav-links a, .user-actions a {
-    color: white;
-    text-decoration: none;
-    margin-left: 1rem;
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
-    transition: background-color 0.3s ease, color 0.3s ease;
-}
+    .sidebar:hover, .sidebar:focus-within {
+        left: 0;
+    }
 
-.nav-links a:hover, .user-actions a:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-}
+    .sidebar-handle {
+        position: absolute;
+        right: -20px;
+        top: 50%;
+        width: 20px;
+        height: 40px;
+        background-color: var(--primary-color);
+        border-radius: 0 5px 5px 0;
+        cursor: pointer;
+    }
 
-.chat-container {
-    height: calc(100vh - 220px);
-    overflow-y: auto;
-}
+    .analysis-modal {
+        position: fixed;
+        top: 64px;
+        left: 150px;
+        right: 150px;
+        bottom: 75px;
+        background-color: rgba(255, 255, 255, 0.95);
+        z-index: 1001;
+        display: none;
+        overflow-y: auto;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
 
-.message {
-    max-width: 70%;
-    margin-bottom: 20px;
-    padding: 20px;
-    border-radius: 10px;
-}
+    @keyframes typeWriter {
+        from { width: 0; }
+        to { width: 100%; }
+    }
 
-.user-message {
-    background-color: #e2e8f0;
-    align-self: flex-end;
-}
+    .type-writer {
+        overflow: hidden;
+        border-right: .15em solid var(--secondary-color);
+        white-space: nowrap;
+        margin: 0 auto;
+        letter-spacing: .15em;
+        animation:
+            typeWriter 3.5s steps(40, end),
+            blink-caret .75s step-end infinite;
+    }
 
-.ai-message {
-    background-color: #bfdbfe;
-    color: #1e3a8a;
-    align-self: flex-start;
-}
-
-.sidebar {
-    position: fixed;
-    left: -250px;
-    top: 60px;
-    bottom: 0;
-    width: 250px;
-    background-color: var(--card-bg);
-    transition: left 0.3s ease-in-out;
-    z-index: 1000;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-}
-
-.sidebar:hover, .sidebar:focus-within {
-    left: 0;
-}
-
-.sidebar-handle {
-    position: absolute;
-    right: -20px;
-    top: 50%;
-    width: 20px;
-    height: 40px;
-    background-color: var(--primary-color);
-    border-radius: 0 5px 5px 0;
-    cursor: pointer;
-}
-
-.analysis-modal {
-    position: fixed;
-    top: 60px;
-    left: 150px;
-    right: 150px;
-    bottom: 75px;
-    background-color: rgba(255, 255, 255, 0.9);
-    z-index: 1001;
-    display: none;
-    overflow-y: auto;
-}
-
-@keyframes typeWriter {
-    from { width: 0; }
-    to { width: 100%; }
-}
-
-.type-writer {
-    overflow: hidden;
-    border-right: .15em solid orange;
-    white-space: nowrap;
-    margin: 0 auto;
-    letter-spacing: .15em;
-    animation:
-        typeWriter 3.5s steps(40, end),
-        blink-caret .75s step-end infinite;
-}
-
-@keyframes blink-caret {
-    from, to { border-color: transparent }
-    50% { border-color: orange; }
-}
+    @keyframes blink-caret {
+        from, to { border-color: transparent }
+        50% { border-color: var(--secondary-color); }
+    }
 </style>
-<body class="bg-gray-100">
-    <nav class="bg-primary text-white p-4 fixed top-0 left-0 right-0 z-50">
-        <div class="container mx-auto flex justify-between items-center">
-            <div class="logo">MediAI</div>
-            <div class="nav-links">
-                <a href="landing_page.html">Dashboard</a>
-                <a href="#medical-image">Medical Image Analysis</a>
-                <a href="chatbot.html">Symptom Analysis</a>
-                <a href="#drug-interaction">Drug Interaction</a>
-            </div>
-            <div class="user-actions">
-                <a href="#profile">Profile</a>
-                <a href="#logout">Logout</a>
-            </div>
-        </div>
-    </nav>
+{% endblock %}
 
-    <div class="sidebar">
-        <div class="sidebar-handle"></div>
-        <div class="p-4">
-            <h2 class="text-xl font-semibold mb-4">Conversation History</h2>
-            <ul id="conversationList" class="space-y-2">
-                <!-- Conversation history will be populated here -->
-            </ul>
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-end mb-4">
+        <button id="analyzeButton" class="bg-secondary text-white px-4 py-2 rounded-lg hover:bg-secondary-dark focus:outline-none focus:ring-2 focus:ring-secondary hidden">
+            Analyze Conversation
+        </button>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-lg p-6 mb-4">
+        <div id="chatContainer" class="chat-container flex flex-col space-y-4 mb-4">
+            <!-- Chat messages will be displayed here -->
         </div>
     </div>
 
-    <div class="container mx-auto px-4 py-8 mt-20">
-        <div class="flex justify-end mb-4">
-            <button id="analyzeButton" class="bg-secondary text-white px-4 py-2 rounded-lg hover:bg-secondary-dark focus:outline-none focus:ring-2 focus:ring-secondary hidden">
-                Analyze Conversation
-            </button>
-        </div>
-
-        <div class="bg-white rounded-lg shadow-md p-4 mb-4">
-            <div id="chatContainer" class="chat-container flex flex-col space-y-4 mb-4">
-                <!-- Chat messages will be displayed here -->
-            </div>
-        </div>
-
-        <div class="fixed bottom-0 left-0 right-0 bg-white p-4 shadow-md">
-            <div class="container mx-auto flex">
-                <input id="userInput" type="text" class="flex-grow border rounded-l-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Type your symptoms here...">
-                <button id="sendButton" class="bg-primary text-white px-6 py-2 rounded-r-lg hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary">Send</button>
-            </div>
+    <div class="fixed bottom-0 left-0 right-0 bg-white p-4 shadow-lg">
+        <div class="container mx-auto flex">
+            <input id="userInput" type="text" class="flex-grow border rounded-l-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Type your symptoms here...">
+            <button id="sendButton" class="bg-primary text-white px-6 py-2 rounded-r-lg hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary transition duration-300">Send</button>
         </div>
     </div>
+</div>
 
-    <div id="analysisModal" class="analysis-modal">
-        <div class="p-6">
-            <h2 class="text-2xl font-semibold mb-4">Conversation Analysis</h2>
-            <p id="analysisContent" class="text-lg"></p>
-            <button id="closeAnalysis" class="mt-4 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary">Close</button>
-        </div>
+<div class="sidebar">
+    <div class="sidebar-handle"></div>
+    <div class="p-4">
+        <h2 class="text-xl font-semibold mb-4">Conversation History</h2>
+        <ul id="conversationList" class="space-y-2">
+            <!-- Conversation history will be populated here -->
+        </ul>
     </div>
+</div>
 
-    <script type="module" src="js/symptom_analysis.js"></script>
-</body>
-</html>
+<div id="analysisModal" class="analysis-modal">
+    <div class="p-6">
+        <h2 class="text-2xl font-semibold mb-4">Conversation Analysis</h2>
+        <p id="analysisContent" class="text-lg"></p>
+        <button id="closeAnalysis" class="mt-4 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary transition duration-300">Close</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+<script type="module" src="js/symptom_analysis.js"></script>
+{% endblock %}
