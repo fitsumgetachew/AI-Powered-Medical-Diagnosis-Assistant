@@ -263,7 +263,7 @@ const UserProfile = () => {
 
   const fetchProfile = async () => {
     try {
-      const response = await sendRequest('users/profile/', 'GET'); // Removed hardcoded URL
+      const response = await sendRequest('users/profile/', 'GET');
       if (response.ok) {
         setProfile(response.data);
         setFirstName(response.data.first_name);
@@ -293,6 +293,14 @@ const UserProfile = () => {
     } catch (error) {
       console.error('Profile update error:', error);
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('is_doctor');
+    localStorage.removeItem('userInfo');
+    navigate('/login'); // Redirect to login page
   };
 
   useEffect(() => {
@@ -331,6 +339,7 @@ const UserProfile = () => {
           <button onClick={() => setEditing(true)}>Edit Profile</button>
         </div>
       )}
+      <button onClick={handleLogout} className="logout-button">Logout</button> {/* Logout button */}
     </div>
   );
 };
