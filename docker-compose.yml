@@ -17,8 +17,10 @@ services:
 
   # React Frontend
   frontend:
-    build: ./frontend/medical-assistant-frontend
+    build: ./frontend/
     container_name: react_app
+    volumes:
+      - ./frontend/dist:/usr/share/nginx/html
     ports:
       - "80:80"
     networks:
