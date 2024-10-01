@@ -533,13 +533,11 @@ class OralCancerTestView(APIView):
 
         return Response(serializer.errors, status=400)
 
-
 """
 ============================================================================
                         VIEWS FOR USER DASHBOARD
 ============================================================================
 """
-
 
 class AnalysisResultsView(APIView):
     """

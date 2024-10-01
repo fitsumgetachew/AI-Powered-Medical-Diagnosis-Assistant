@@ -56,7 +56,7 @@ const MedicalImageAnalysis = () => {
           endpoint = 'http://127.0.0.1:8000/analysis/pneumonia/';
           break;
         case 'bone-fracture':
-          endpoint = 'http://127.0.0.1:8000/analysis/bone-fracture/';
+          endpoint = 'http://127.0.0.1:8000/analysis/bones-fracture/';
           break;
         case 'breast-cancer':
           endpoint = 'http://127.0.0.1:8000/analysis/breast-cancer/';
