@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view , permission_classes ,authenticat
 from rest_framework import permissions, status
 from .serializers import CreateUserSerializer, \
     CreateOAUTHSerializer, UserProfileSerialize, \
-    OTPSerializer,  ChangePasswordSerializer
+    OTPSerializer, ChangePasswordSerializer, UserSerializer
 
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
@@ -291,3 +291,19 @@ def google_login(request):
     except Exception as e:
         return Response({'message': 'Internal error occurred: ' + str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@api_view(['GET'])
+def user_list(request):
+    """
+    Handles GET requests.
+
+    Retrieves and returns a list of all users in the system.
+
+    Parameters:
+    - request: The incoming HTTP request.
+
+    Returns:
+    - A Response object with a JSON payload containing the user data.
+    """
+    users = User.objects.all()
+    serializer = UserSerializer(users, many=True)
+    return Response(serializer.data, status=200)

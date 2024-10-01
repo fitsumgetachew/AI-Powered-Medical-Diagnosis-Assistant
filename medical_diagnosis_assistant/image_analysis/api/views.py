@@ -23,6 +23,7 @@ import tensorflow as tf
 import numpy as np
 from PIL import Image
 from ..models import MedicalImage, ImageAnalysisResult
+from accounts.models import User
 
 from .serializers import MedicalImageSerializer, ImageAnalysisResultSerializer
 from ..utils import save_analysis_results
@@ -33,12 +34,52 @@ from ..utils import save_analysis_results
 ============================================================================
 """
 
-
 class TuberculosisTestView(APIView):
     """
     This class represents a view for performing tuberculosis test on medical XRAY images.
     It inherits from the APIView class provided by Django REST framework.
     """
+
+    def preprocess_image(self, image):
+        """
+        Preprocesses the uploaded image for tuberculosis detection.
+
+        Parameters:
+        - image: The uploaded image.
+
+        Returns:
+        - The preprocessed image.
+        """
+        img = Image.open(image).convert('L')
+        img = img.resize((320, 320))
+        x = np.array(img)
+        x = np.stack((x,) * 3, axis=-1)
+        x = tf.image.resize(x, [320, 320])
+        x = np.array(x) / 255.0
+        x = np.expand_dims(x, axis=0)
+        return x
+
+    def inference(self, model, x):
+        """
+        Performs inference on the preprocessed image using the specified model.
+
+        Parameters:
+        - model: The pre-trained model to use for inference.
+        - x: The preprocessed image data.
+
+        Returns:
+        - output: The classification result as a string.
+        - abnormality_detected: A boolean indicating if an abnormality was detected.
+        - confidence_score: The confidence score of the prediction.
+        """
+        pred = model.predict(x)
+        result = int(np.where(pred >= 0.5, 1, 0))
+
+        output = 'Normal' if result == 0 else 'Tuberculosis'
+        abnormality_detected = result == 1
+        confidence_score = float(pred[0][0])
+
+        return output, abnormality_detected, confidence_score
 
     def get(self, request):
         """
@@ -85,26 +126,12 @@ class TuberculosisTestView(APIView):
 
             # Retrieve the uploaded file
             file = request.FILES['image']
-            img = Image.open(file).convert('L')
 
-            # Resize the image to match the model input
-            img = img.resize((320, 320))
-            x = np.array(img)
-            x = np.stack((x,) * 3, axis=-1)
-            x = tf.image.resize(x, [320, 320])
-            x = np.array(x) / 255.0
-            x = np.expand_dims(x, axis=0)
+            # Preprocess the image
+            x = self.preprocess_image(file)
 
-            # Predict with the model
-            pred = model.predict(x)
-            threshold = 0.5
-            label = np.where(pred >= threshold, 1, 0)
-            result = int(label)
-
-            # Generate the analysis result
-            output = 'Normal' if result == 0 else 'Tuberculosis'
-            abnormality_detected = result == 1
-            confidence_score = float(pred[0][0])
+            # Inference
+            output, abnormality_detected, confidence_score = self.inference(model, x)
 
             # Save the analysis result
             save_analysis_results(
@@ -125,6 +152,45 @@ class PneumoniaTestView(APIView):
     This class represents a view for performing pneumonia tests on medical images.
     It inherits from the APIView class provided by Django REST framework.
     """
+    def preprocess_image(self, image):
+        """
+        Preprocesses the uploaded image for pneumonia detection.
+
+        Parameters:
+        - image: The uploaded image.
+
+        Returns:
+        - The preprocessed image.
+        """
+        img = Image.open(image).convert('L')
+        img = img.resize((224, 224))
+        x = np.array(img)
+        x = np.stack((x,) * 3, axis=-1)
+        x = np.expand_dims(x, axis=0)
+        x = x / 255.0
+        return x
+
+    def inference(self, model, x):
+        """
+        Performs inference on the preprocessed image using the specified model.
+
+        Parameters:
+        - model: The pre-trained model to use for inference.
+        - x: The preprocessed image data.
+
+        Returns:
+        - output: The classification result as a string.
+        - abnormality_detected: A boolean indicating if an abnormality was detected.
+        - confidence_score: The confidence score of the prediction.
+        """
+        pred = model.predict(x)
+        result = int(np.where(pred >= 0.5, 1, 0))
+
+        output = 'Normal' if result == 0 else 'Pneumonia'
+        abnormality_detected = result == 1
+        confidence_score = float(pred[0][0])
+
+        return output, abnormality_detected, confidence_score
 
     def get(self, request):
         """
@@ -171,23 +237,12 @@ class PneumoniaTestView(APIView):
 
             # Retrieve the uploaded file
             file = request.FILES['image']
-            img = Image.open(file).convert('L')
 
-            # Resize the image to match the model input
-            img = img.resize((224, 224))
-            x = np.array(img)
-            x = np.stack((x,) * 3, axis=-1)
-            x = np.expand_dims(x, axis=0)
-            x = x / 255.0
+            # Preprocess the image
+            x = self.preprocess_image(file)
 
-            # Predict with the model
-            pred = model.predict(x)
-            result = int(np.where(pred >= 0.5, 1, 0))
-
-            # Generate the analysis result
-            output = 'Normal' if result == 0 else 'Pneumonia'
-            abnormality_detected = result == 1
-            confidence_score = float(pred[0][0])
+            # Inference
+            output, abnormality_detected, confidence_score = self.inference(model, x)
 
             # Save the analysis result
             save_analysis_results(
@@ -208,6 +263,50 @@ class BonesFractureTestView(APIView):
     This class represents a view for performing bone fracture detection on medical images.
     It inherits from the APIView class provided by Django REST framework.
     """
+
+    def preprocess_image(self, image):
+        """
+        Preprocesses the uploaded image for bone fracture detection.
+
+        Parameters:
+        - image: The uploaded image.
+
+        Returns:
+        - The preprocessed image.
+        """
+        img = Image.open(image).convert('L')
+
+        # Resize the image
+        img = img.resize((224, 224))
+        x = np.array(img)
+        x = np.stack((x,) * 3, axis=-1)
+        x = np.expand_dims(x, axis=0)
+        x = x / 255.0
+
+        return x
+
+    def inference(self, model, x):
+        """
+        Performs inference on the preprocessed image using the specified model.
+
+        Parameters:
+        - model: The pre-trained model to use for inference.
+        - x: The preprocessed image data.
+
+        Returns:
+        - output: The classification result as a string.
+        - abnormality_detected: A boolean indicating if an abnormality was detected.
+        - confidence_score: The confidence score of the prediction.
+        """
+        pred = model.predict(x)
+        print(pred[0][0])
+        result = int(np.where(pred >= 0.5, 1, 0))
+        print(result)
+        output = 'Fracture' if result == 1 else 'No Fracture'
+        abnormality_detected = result == 1
+        confidence_score = float(pred[0][0])
+
+        return output, abnormality_detected, confidence_score
 
     def get(self, request):
         """
@@ -234,23 +333,12 @@ class BonesFractureTestView(APIView):
 
             # Retrieve the uploaded file
             file = request.FILES['image']
-            img = Image.open(file).convert('L')
 
-            # Resize the image
-            img = img.resize((224, 224))
-            x = np.array(img)
-            x = np.stack((x,) * 3, axis=-1)
-            x = np.expand_dims(x, axis=0)
-            x = x / 255.0
+            # Preprocess the image
+            x = self.preprocess_image(file)
 
-            # Make the prediction
-            pred = model.predict(x)
-            result = int(np.where(pred >= 0.5, 1, 0))
-
-            # Generate the analysis result
-            output = 'Fracture' if result == 0 else 'No Fracture'
-            abnormality_detected = result == 0
-            confidence_score = float(pred[0][0])
+            # Inference
+            output, abnormality_detected, confidence_score = self.inference(model, x)
 
             # Save the analysis result
             save_analysis_results(
@@ -271,6 +359,44 @@ class BreastCancerTestView(APIView):
     This class represents a view for performing breast cancer detection on medical images.
     It inherits from the APIView class provided by Django REST framework.
     """
+
+    def preprocess_image(self, image):
+        """
+        Preprocesses the uploaded image for breast cancer detection.
+
+        Parameters:
+        - image: The uploaded image.
+
+        Returns:
+        - The preprocessed image.
+        """
+        img = Image.open(image).convert('RGB')
+        img = img.resize((256, 256))
+        x = np.array(img) / 255.0
+        x = np.expand_dims(x, axis=0)
+        return x
+
+    def inference(self, model, x):
+        """
+        Performs inference on the preprocessed image using the specified model.
+
+        Parameters:
+        - model: The pre-trained model to use for inference.
+        - x: The preprocessed image data.
+
+        Returns:
+        - output: The classification result as a string.
+        - abnormality_detected: A boolean indicating if an abnormality was detected.
+        - confidence_score: The confidence score of the prediction.
+        """
+        pred = model.predict(x)
+        result = int(np.argmax(pred))
+
+        output = 'BENIGN' if result == 0 else 'BREAST MALIGNANT'
+        abnormality_detected = result == 1
+        confidence_score = float(pred[0][result])
+
+        return output, abnormality_detected, confidence_score
 
     def get(self, request):
         """
@@ -297,21 +423,12 @@ class BreastCancerTestView(APIView):
 
             # Retrieve the uploaded file
             file = request.FILES['image']
-            img = Image.open(file).convert('RGB')
 
-            # Resize the image
-            img = img.resize((256, 256))
-            x = np.array(img) / 255.0
-            x = np.expand_dims(x, axis=0)
+            # Preprocess the image
+            x = self.preprocess_image(file)
 
-            # Make the prediction
-            pred = model.predict(x)
-            result = int(np.argmax(pred))
-
-            # Generate the analysis result
-            output = 'BENIGN' if result == 0 else 'BREAST MALIGNANT'
-            abnormality_detected = result == 1
-            confidence_score = float(pred[0][result])
+            # Run the Inference
+            output, abnormality_detected, confidence_score = self.inference(model, x)
 
             # Save the analysis result
             save_analysis_results(
@@ -332,6 +449,43 @@ class OralCancerTestView(APIView):
     This class represents a view for performing oral cancer detection on medical images.
     It inherits from the APIView class provided by Django REST framework.
     """
+    def preprocess_image(self, image):
+        """
+        Preprocesses the uploaded image for oral cancer detection.
+
+        Parameters:
+        - image: The uploaded image.
+
+        Returns:
+        - The preprocessed image.
+        """
+        img = Image.open(image).convert('RGB')
+        img = img.resize((224, 224))
+        x = np.array(img) / 255.0
+        x = np.expand_dims(x, axis=0)
+        return x
+
+    def inference(self, model, x):
+        """
+        Performs inference on the preprocessed image using the specified model.
+
+        Parameters:
+        - model: The pre-trained model to use for inference.
+        - x: The preprocessed image data.
+
+        Returns:
+        - output: The classification result as a string.
+        - abnormality_detected: A boolean indicating if an abnormality was detected.
+        - confidence_score: The confidence score of the prediction.
+        """
+        pred = model.predict(x)
+        result = int(np.argmax(pred))
+
+        output = 'normal' if result == 0 else 'Oral Cancer'
+        abnormality_detected = result == 1
+        confidence_score = float(pred[0][result])
+
+        return output, abnormality_detected, confidence_score
 
     def get(self, request):
         """
@@ -358,21 +512,12 @@ class OralCancerTestView(APIView):
 
             # Retrieve the uploaded file
             file = request.FILES['image']
-            img = Image.open(file).convert('RGB')
 
-            # Resize the image
-            img = img.resize((224, 224))
-            x = np.array(img) / 255.0
-            x = np.expand_dims(x, axis=0)
+            # Preprocess the image
+            x = self.preprocess_image(file)
 
-            # Make the prediction
-            pred = model.predict(x)
-            result = int(np.argmax(pred))
-
-            # Generate the analysis result
-            output = 'normal' if result == 0 else 'Oral Cancer'
-            abnormality_detected = result == 1
-            confidence_score = float(pred[0][result])
+            # Run the inference
+            output, abnormality_detected, confidence_score = self.inference(model, x)
 
             # Save the analysis result
             save_analysis_results(
@@ -435,3 +580,36 @@ class AnalysisResultsView(APIView):
 
         except Exception as e:
             return Response({'error': str(e)}, status=500)
+
+class AnalysisResultDetailView(APIView):
+    """
+    This class represents a view for retrieving a specific analysis result for a user.
+    It inherits from the APIView class provided by Django REST framework.
+    """
+
+    def get(self, request, pk=None):
+        """
+        Handles GET requests.
+
+        Retrieves and returns the analysis result for the specified result ID.
+
+        Parameters:
+        - request: The incoming HTTP request.
+        - pk: The ID of the analysis result to retrieve.
+
+        Returns:
+        - A Response object with a JSON payload containing the analysis result data.
+        """
+        user = 1
+        try:
+            # Retrieve the analysis result for the specified ID
+            result = get_object_or_404(ImageAnalysisResult, id=pk, medical_image__user=user)
+
+            # Serialize the result
+            serializer = ImageAnalysisResultSerializer(result)
+
+            return Response(serializer.data, status=200)
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)
+
