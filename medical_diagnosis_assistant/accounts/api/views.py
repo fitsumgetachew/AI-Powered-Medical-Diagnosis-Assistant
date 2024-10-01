@@ -1,283 +1,444 @@
-
-from rest_framework.decorators import api_view , permission_classes ,authentication_classes
-from rest_framework import permissions, status
-from .serializers import CreateUserSerializer, \
-    CreateOAUTHSerializer, UserProfileSerialize, \
-    OTPSerializer,  ChangePasswordSerializer
-
+from rest_framework import status, permissions
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from accounts.models import User, OtpModel, Doctor
-
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import check_password
-import secrets
+from .serializers import (
+    CreateUserSerializer,
+    CreateOAUTHSerializer,
+    UserProfileSerialize,
+    OTPSerializer,
+    ChangePasswordSerializer
+)
+from accounts.models import User, OtpModel, Doctor
 from .utils import get_tokens_for_user, send_email
-from datetime import timedelta
-from django.utils import timezone
+import secrets
 import requests
 import json
 
-from rest_framework.exceptions import ValidationError
 
+class CreateAccountView(APIView):
+    """
+    API View for creating a new user account.
 
-@api_view(['POST'])
-@permission_classes([permissions.AllowAny])
-def create_account(request):
-    try:
-        receiver_email = request.data['email']
-        if not request.data.get('otp', None):
-            return Response({"message": "verify your email by sending otp first"}, status=400)
+    This view handles the process of creating a new user account after email verification.
+    It expects the client to provide an email and OTP for verification before creating the account.
 
-        user_serializer = CreateUserSerializer(data=request.data)
+    Permissions:
+    - AllowAny
 
-        if user_serializer.is_valid(raise_exception=True):
-            try:
-                otp_obj = OtpModel.objects.get(email=receiver_email)
-            except OtpModel.DoesNotExist:
-                return Response({"message": "verify your email by sending otp first"}, status=400)
+    HTTP Methods:
+    - POST: Create a new user account
+    """
 
-            if otp_obj.otp == request.data['otp']:
-                instance = user_serializer.save()
-                return Response({"message": "account created successfully"}, status=200)
-            else:
-                return Response({"message": "enter correct otp"}, status=400)
+    permission_classes = [AllowAny]
 
-    except ValidationError as e:
-        return Response({"message": e.detail}, status=400)
-    except Exception as e:
-        return Response({"message": str(e)}, status=500)
+    def post(self, request):
+        """
+        Handle POST request to create a new user account.
 
+        Args:
+            request (Request): The incoming request object.
 
+        Returns:
+            Response: A response indicating the result of the account creation attempt.
 
-@api_view(['POST'])
-@permission_classes([permissions.AllowAny])
-def login(request):
-    try:
-        email = request.data['email']
-        password = request.data['password']
-        print(email, password)
-        user = User.objects.get(email=email)
-        print(user)
-        if not check_password(password, user.password):
-            print("wrong password ")
-            return Response({"password": "wrong password "})
-
-        if user.is_active:
-            token = get_tokens_for_user(user)
-
-            return Response({'refresh': token['refresh'],
-                             'access': token['access'],
-                             'is_doctor':user.is_doctor})
-    except User.DoesNotExist:
-        return Response({"error": "User does not exist"}, status=status.HTTP_400_BAD_REQUEST)
-
-    except ValidationError as e:
-        # Handle the validation error explicitly
-        return Response({"message": e.detail}, status=400)
-    except Exception as e:
-        print(e)
-        return Response(status = 500)
-
-@api_view(['POST'])
-@authentication_classes([JWTAuthentication])
-@permission_classes([permissions.IsAuthenticated])
-def logout(request):
-    try:
-        refresh_token = request.data['refresh']
-        token = RefreshToken(refresh_token)
-
-        token.blacklist()
-
-        return Response({"detail": "Successfully logged out."}, status=status.HTTP_200_OK)
-
-    except ValidationError as e:
-        # Handle the validation error explicitly
-        return Response({"message": e.detail}, status=400)
-
-    except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(['GET', 'PUT', 'PATCH'])
-@authentication_classes([JWTAuthentication])
-@permission_classes([permissions.IsAuthenticated])
-def user_profile(request):
-    try:
-        user_obj = request.user
-
-        if request.method == 'GET':
-            data = UserProfileSerialize(user_obj, many=False).data
-            return Response(data)
-
-        elif request.method in ['PUT', 'PATCH']:
-            serializer = UserProfileSerialize(data=request.data, partial=True)  # Allow partial updates
-
-            if serializer.is_valid(raise_exception=True):
-                serializer.update(user_obj, request.data)
-
-                return Response(
-                    {'detail': 'Profile updated successfully.'},
-                    status=status.HTTP_200_OK
-                )
-    except ValidationError as e:
-        return Response({"message": e.detail}, status=400)
-
-    except Doctor.DoesNotExist:
-        # Handle the case where a doctor profile does not exist
-        return Response({"message": "Doctor profile does not exist"}, status=404)
-
-
-@api_view(['POST'])
-@authentication_classes([JWTAuthentication])
-@permission_classes([permissions.IsAuthenticated])
-def change_password(request):
-
-    old_password = request.data.get('old_password')
-    new_password = request.data.get('new_password')
-    try:
-        user = request.user
-        if user.check_password(old_password):
-            serializer = ChangePasswordSerializer(data=request.data)
-
-            if serializer.is_valid(raise_exception=True):
-                user.set_password(new_password)
-                user.is_validate = True
-                user.save()
-                return Response({"message": "Password changed successfully"}, status=status.HTTP_200_OK)
-
-        return Response({"error": "Wrong old password"}, status=status.HTTP_400_BAD_REQUEST)
-    except User.DoesNotExist:
-        return Response({"error": "User does not exist"}, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
-
-@api_view(['POST'])
-@permission_classes([permissions.AllowAny])
-def send_otp(request):
-    try:
-        email = request.data['email']
-        sample_otp = 12345
-        subject = "OTP from MedAI"
-        message = f"your OTP is: {sample_otp}"
-
-        queryset = User.objects.filter(email=email).exists()
-        if queryset:
-            return  Response({"message": "Account already created using this email address"}, status=400)
-
-        serializer = OTPSerializer(data={"email": email, "otp": sample_otp})
-
-        if serializer.is_valid(raise_exception=True):
-
-            if send_email(email, subject, message):
-                try:
-
-                    instance = OtpModel.objects.get(email=email)
-
-                    instance.otp = sample_otp
-                    instance.save()
-                except OtpModel.DoesNotExist:
-
-                    serializer.save()
-
-                return Response({"message": "OTP sent successfully"}, status=200)
-            else:
-                return Response({"message": "Failed to send OTP email"}, status=500)
-        return Response({"message": "Invalid data"}, status=400)
-
-    except ValidationError as e:
-        # Handle the validation error explicitly
-        return Response({"message": e.detail}, status=400)
-
-
-
-
-
-@api_view(['POST'])
-@permission_classes([permissions.AllowAny])
-def forget_password(request):
-    try:
-        email = request.data['email']
-        user = User.objects.get(email = email)
-
-        if not user:
-            return Response("there is no account with a given email address")
-
-        temp_password = secrets.token_urlsafe(10)
-        subject = 'Password for login'
-        message = f'Your temporary password is: {temp_password}'
-
-        if send_email(email , subject , message):
-            user.set_password(temp_password)
-            user.save()
-            print(temp_password)
-            return Response({"You password is successfully recovered , check your email you are received temporary password"})
-
-        return Response(status = 500)
-
-
-    except User.DoesNotExist:
-        return Response({"error": "User does not exist with a given email address"}, status=status.HTTP_400_BAD_REQUEST)
-
-    except ValidationError as e:
-        # Handle the validation error explicitly
-        return Response({"message": e.detail}, status=400)
-
-
-
-GOOGLE_CLIENT_ID = '836345213785-7ahselh9p78a93lu7gofpb07venfcmba.apps.googleusercontent.com'
-
-SOCIAL_PASSWORD = 'this_is_social_password'
-@api_view(['POST'])
-@permission_classes([permissions.AllowAny])
-def google_login(request):
-    try:
-        # body = json.loads(request.body.decode('utf-8'))
-        token = request.data.get('google_token')
-
-        response = requests.get(f'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token={token}')
-        userinfo = response.json()
-
-        if response.status_code != 200 or userinfo.get('aud') != GOOGLE_CLIENT_ID:
-            return Response({'error': 'Invalid Token'}, status=status.HTTP_400_BAD_REQUEST)
-
-        email = userinfo.get('email')
+        Raises:
+            ValidationError: If the provided data is invalid.
+        """
         try:
+            receiver_email = request.data['email']
+            if not request.data.get('otp', None):
+                return Response({"message": "Verify your email by sending OTP first"},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            user_serializer = CreateUserSerializer(data=request.data)
+
+            if user_serializer.is_valid(raise_exception=True):
+                try:
+                    otp_obj = OtpModel.objects.get(email=receiver_email)
+                except OtpModel.DoesNotExist:
+                    return Response({"message": "Verify your email by sending OTP first"},
+                                    status=status.HTTP_400_BAD_REQUEST)
+
+                if otp_obj.otp == request.data['otp']:
+                    user_serializer.save()
+                    return Response({"message": "Account created successfully"}, status=status.HTTP_200_OK)
+                else:
+                    return Response({"message": "Enter correct OTP"}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class LoginView(APIView):
+    """
+    API View for user login.
+
+    This view handles user authentication and returns JWT tokens upon successful login.
+
+    Permissions:
+    - AllowAny
+
+    HTTP Methods:
+    - POST: Authenticate user and return tokens
+    """
+
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        """
+        Handle POST request for user login.
+
+        Args:
+            request (Request): The incoming request object containing login credentials.
+
+        Returns:
+            Response: JWT tokens if login is successful, error message otherwise.
+        """
+        try:
+            email = request.data['email']
+            password = request.data['password']
             user = User.objects.get(email=email)
+
+            if not check_password(password, user.password):
+                return Response({"password": "Wrong password"}, status=status.HTTP_400_BAD_REQUEST)
+
             if user.is_active:
                 token = get_tokens_for_user(user)
-                return Response({'refresh': token['refresh'], 'access': token['access'], 'is_doctor':user.is_doctor}, status=status.HTTP_200_OK)
+                return Response({
+                    'refresh': token['refresh'],
+                    'access': token['access'],
+                    'is_doctor': user.is_doctor
+                }, status=status.HTTP_200_OK)
+
         except User.DoesNotExist:
-            pass
+            return Response({"error": "User does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        # If the user does not exist or is not validated, create a new one
-        user_data = {
-            "first_name": userinfo.get('given_name', ''),
-            "last_name": userinfo.get('family_name', ''),
-            "email": email,
-            "password": SOCIAL_PASSWORD
-        }
 
-        serializer = CreateOAUTHSerializer(data=user_data)
-        if serializer.is_valid(raise_exception=True):
-            instance = serializer.save()
+class LogoutView(APIView):
+    """
+    API View for user logout.
 
-            token = get_tokens_for_user(instance)
+    This view handles user logout by blacklisting the refresh token.
 
-            return Response({'refresh': token['refresh'], 'access': token['access'], 'is_doctor':instance.is_doctor}, status=status.HTTP_201_CREATED)
+    Authentication:
+    - JWT Authentication
 
-    except json.JSONDecodeError:
-        return Response({'error': 'Invalid JSON'}, status=status.HTTP_400_BAD_REQUEST)
-    except requests.RequestException:
-        return Response({'error': 'Failed to validate token with Google'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+    Permissions:
+    - IsAuthenticated
 
-    except ValidationError as e:
-        # Handle the validation error explicitly
-        return Response({"message": e.detail}, status=400)
+    HTTP Methods:
+    - POST: Logout user and blacklist refresh token
+    """
 
-    except Exception as e:
-        return Response({'message': 'Internal error occurred: ' + str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
+    def post(self, request):
+        """
+        Handle POST request for user logout.
+
+        Args:
+            request (Request): The incoming request object containing the refresh token.
+
+        Returns:
+            Response: Confirmation of successful logout or error message.
+        """
+        try:
+            refresh_token = request.data['refresh']
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response({"detail": "Successfully logged out."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserProfileView(APIView):
+    """
+    API View for user profile operations.
+
+    This view handles retrieving and updating user profile information.
+
+    Authentication:
+    - JWT Authentication
+
+    Permissions:
+    - IsAuthenticated
+
+    HTTP Methods:
+    - GET: Retrieve user profile
+    - PUT/PATCH: Update user profile
+    """
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """
+        Handle GET request to retrieve user profile.
+
+        Args:
+            request (Request): The incoming request object.
+
+        Returns:
+            Response: User profile data.
+        """
+        user_obj = request.user
+        data = UserProfileSerialize(user_obj).data
+        return Response(data)
+
+    def put(self, request):
+        """
+        Handle PUT request to update user profile.
+
+        Args:
+            request (Request): The incoming request object with updated profile data.
+
+        Returns:
+            Response: Confirmation of successful update or error message.
+        """
+        return self.update_profile(request)
+
+    def patch(self, request):
+        """
+        Handle PATCH request to partially update user profile.
+
+        Args:
+            request (Request): The incoming request object with partial profile data.
+
+        Returns:
+            Response: Confirmation of successful update or error message.
+        """
+        return self.update_profile(request)
+
+    def update_profile(self, request):
+        """
+        Helper method to update user profile.
+
+        Args:
+            request (Request): The incoming request object with profile data.
+
+        Returns:
+            Response: Confirmation of successful update or error message.
+        """
+        try:
+            user_obj = request.user
+            serializer = UserProfileSerialize(data=request.data, partial=True)
+            if serializer.is_valid(raise_exception=True):
+                serializer.update(user_obj, request.data)
+                return Response({'detail': 'Profile updated successfully.'}, status=status.HTTP_200_OK)
+        except Doctor.DoesNotExist:
+            return Response({"message": "Doctor profile does not exist"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ChangePasswordView(APIView):
+    """
+    API View for changing user password.
+
+    This view handles the process of changing a user's password.
+
+    Authentication:
+    - JWT Authentication
+
+    Permissions:
+    - IsAuthenticated
+
+    HTTP Methods:
+    - POST: Change user password
+    """
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        """
+        Handle POST request to change user password.
+
+        Args:
+            request (Request): The incoming request object with old and new password.
+
+        Returns:
+            Response: Confirmation of successful password change or error message.
+        """
+        old_password = request.data.get('old_password')
+        new_password = request.data.get('new_password')
+        try:
+            user = request.user
+            if user.check_password(old_password):
+                serializer = ChangePasswordSerializer(data=request.data)
+                if serializer.is_valid(raise_exception=True):
+                    user.set_password(new_password)
+                    user.is_validate = True
+                    user.save()
+                    return Response({"message": "Password changed successfully"}, status=status.HTTP_200_OK)
+            return Response({"error": "Wrong old password"}, status=status.HTTP_400_BAD_REQUEST)
+        except User.DoesNotExist:
+            return Response({"error": "User does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SendOTPView(APIView):
+    """
+    API View for sending OTP.
+
+    This view handles the process of sending an OTP to a user's email for verification.
+
+    Permissions:
+    - AllowAny
+
+    HTTP Methods:
+    - POST: Send OTP to user's email
+    """
+
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        """
+        Handle POST request to send OTP.
+
+        Args:
+            request (Request): The incoming request object with user's email.
+
+        Returns:
+            Response: Confirmation of OTP sent or error message.
+        """
+        try:
+            email = request.data['email']
+            sample_otp = 12345  # In production, generate a real OTP
+            subject = "OTP from MedAI"
+            message = f"Your OTP is: {sample_otp}"
+
+            if User.objects.filter(email=email).exists():
+                return Response({"message": "Account already created using this email address"},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            serializer = OTPSerializer(data={"email": email, "otp": sample_otp})
+            if serializer.is_valid(raise_exception=True):
+                if send_email(email, subject, message):
+                    OtpModel.objects.update_or_create(email=email, defaults={'otp': sample_otp})
+                    return Response({"message": "OTP sent successfully"}, status=status.HTTP_200_OK)
+                else:
+                    return Response({"message": "Failed to send OTP email"},
+                                    status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"message": "Invalid data"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ForgetPasswordView(APIView):
+    """
+    API View for handling forgot password requests.
+
+    This view handles the process of resetting a user's password when they've forgotten it.
+
+    Permissions:
+    - AllowAny
+
+    HTTP Methods:
+    - POST: Reset user's password and send temporary password
+    """
+
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        """
+        Handle POST request for forgot password.
+
+        Args:
+            request (Request): The incoming request object with user's email.
+
+        Returns:
+            Response: Confirmation of password reset or error message.
+        """
+        try:
+            email = request.data['email']
+            user = User.objects.get(email=email)
+
+            temp_password = secrets.token_urlsafe(10)
+            subject = 'Password for login'
+            message = f'Your temporary password is: {temp_password}'
+
+            if send_email(email, subject, message):
+                user.set_password(temp_password)
+                user.save()
+                return Response({
+                                    "message": "Your password is successfully recovered. Check your email for the temporary password."})
+            return Response({"message": "Failed to send email"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        except User.DoesNotExist:
+            return Response({"error": "User does not exist with the given email address"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class GoogleLoginView(APIView):
+    """
+    API View for Google OAuth login.
+
+    This view handles the process of authenticating users via Google OAuth.
+
+    Permissions:
+    - AllowAny
+
+    HTTP Methods:
+    - POST: Authenticate user with Google token and return JWT tokens
+    """
+
+    permission_classes = [AllowAny]
+    GOOGLE_CLIENT_ID = '836345213785-7ahselh9p78a93lu7gofpb07venfcmba.apps.googleusercontent.com'
+    SOCIAL_PASSWORD = 'this_is_social_password'
+
+    def post(self, request):
+        """
+        Handle POST request for Google OAuth login.
+
+        Args:
+            request (Request): The incoming request object with Google token.
+
+        Returns:
+            Response: JWT tokens if login is successful, error message otherwise.
+        """
+        try:
+            token = request.data.get('google_token')
+            response = requests.get(f'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token={token}')
+            userinfo = response.json()
+
+            if response.status_code != 200 or userinfo.get('aud') != self.GOOGLE_CLIENT_ID:
+                return Response({'error': 'Invalid Token'}, status=status.HTTP_400_BAD_REQUEST)
+
+            email = userinfo.get('email')
+            try:
+                user = User.objects.get(email=email)
+                if user.is_active:
+                    token = get_tokens_for_user(user)
+                    return Response(
+                        {'refresh': token['refresh'], 'access': token['access'], 'is_doctor': user.is_doctor},
+                        status=status.HTTP_200_OK)
+            except User.DoesNotExist:
+                user_data = {
+                    "first_name": userinfo.get('given_name', ''),
+                    "last_name": userinfo.get('family_name', ''),
+                    "email": email,
+                    "password": self.SOCIAL_PASSWORD
+                }
+                serializer = CreateOAUTHSerializer(data=user_data)
+                if serializer.is_valid(raise_exception=True):
+                    instance = serializer.save()
+                    token = get_tokens_for_user(instance)
+                    return Response(
+                        {'refresh': token['refresh'], 'access': token['access'], 'is_doctor': instance.is_doctor},
+                        status=status.HTTP_201_CREATED)
+
+        except requests.RequestException:
+            return Response({'error': 'Failed to validate token with Google'},
+                            status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        except Exception as e:
+            return Response({'message': 'Internal error occurred: ' + str(e)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
