@@ -1,27 +1,4 @@
-import json
-import os
-from langchain import LLMChain
-from langchain.llms import OpenAI
-from rest_framework import generics
-from django.contrib.auth import authenticate
-from django.contrib.auth.hashers import make_password, check_password
-from django.contrib.auth.password_validation import password_changed
-from django.http import HttpResponseRedirect
-from django.shortcuts import render, redirect, reverse
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from rest_framework_simplejwt.tokens import RefreshToken
-# Create your views here.
-from django.shortcuts import render
-from rest_framework.views import APIView
-from rest_framework.generics import GenericAPIView, get_object_or_404
-from rest_framework.response import Response
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from django.conf import settings
-from django.core.mail import send_mail
-import tensorflow as tf
-import numpy as np
-from PIL import Image
-
+from rest_framework.generics import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -92,46 +69,97 @@ class DrugAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class PrescriptionListCreateAPIView(APIView):
+    """
+    API view to handle GET and POST requests for the Prescription model.
+    """
+
     def get(self, request):
+        """
+        Handle GET requests to retrieve a list of all prescriptions.
+
+        Args:
+            request: The HTTP request object.
+
+        Returns:
+            Response: A Response object containing the serialized prescription data and HTTP status code 200.
+        """
         prescriptions = Prescription.objects.all()
         serializer = PrescriptionSerializer(prescriptions, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
+        """
+        Handle POST requests to create a new prescription.
+
+        Args:
+            request: The HTTP request object containing the prescription data.
+
+        Returns:
+            Response: A Response object containing the serialized prescription data and HTTP status code 201 if created successfully,
+                      or the validation errors and HTTP status code 400 if the data is invalid.
+        """
         serializer = PrescriptionSerializer(data=request.data)
         if serializer.is_valid():
-            prescription = serializer.save()
+            try:
+                prescription = serializer.save()
 
-            # Handle the many-to-many relationship for drugs
-            drug_ids = request.data.get('drugs', [])
-            drugs = Drug.objects.filter(id__in=drug_ids)
-            prescription.drugs.set(drugs)
+                # Handle the many-to-many relationship for drugs
+                drug_ids = request.data.get('drugs', [])
+                drugs = Drug.objects.filter(id__in=drug_ids)
+                prescription.drugs.set(drugs)
 
-            # Check for drug interactions
-            drug_names = [drug.name for drug in drugs]
-            interaction_api = DrugInteractionAPIView()
-            request_data = {'prescription_drugs': drug_names}
-            response = interaction_api.post(request, request_data)
+                # Check for drug interactions
+                drug_names = [drug.name for drug in drugs]
+                interaction_api = DrugInteractionAPIView()
+                request_data = {'prescription_drugs': drug_names}
+                response = interaction_api.post(request, request_data)
 
-            # Handle the interaction response
-            if response.status_code == status.HTTP_200_OK:
-                interactions = response.data
-                # You can handle the interactions as needed, e.g., log them, notify the doctor, etc.
-                print("Drug interactions:", interactions)
-            else:
-                # Handle the error case
-                print("Error checking drug interactions:", response.data)
+                # Handle the interaction response
+                if response.status_code == status.HTTP_200_OK:
+                    interactions = response.data
+                    # You can handle the interactions as needed, e.g., log them, notify the doctor, etc.
+                    print("Drug interactions:", interactions)
+                else:
+                    # Handle the error case
+                    print("Error checking drug interactions:", response.data)
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class PrescriptionRetrieveUpdateDestroyAPIView(APIView):
+    """
+    API view to handle retrieving, updating, and deleting a prescription by its primary key (pk).
+    """
+
     def get(self, request, pk):
+        """
+        Handle GET requests to retrieve a specific prescription by its primary key (pk).
+
+        Args:
+            request: The HTTP request object.
+            pk: The primary key of the prescription to retrieve.
+
+        Returns:
+            Response: A Response object containing the serialized prescription data and HTTP status code 200.
+        """
         prescription = get_object_or_404(Prescription, pk=pk)
         serializer = PrescriptionSerializer(prescription)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, pk):
+        """
+        Handle PUT requests to update an existing prescription by its primary key (pk).
+
+        Args:
+            request: The HTTP request object containing the updated prescription data.
+            pk: The primary key of the prescription to update.
+
+        Returns:
+            Response: A Response object containing the serialized prescription data and HTTP status code 200 if updated successfully,
+                      or the validation errors and HTTP status code 400 if the data is invalid.
+        """
         prescription = get_object_or_404(Prescription, pk=pk)
         serializer = PrescriptionSerializer(prescription, data=request.data)
         if serializer.is_valid():
@@ -140,6 +168,16 @@ class PrescriptionRetrieveUpdateDestroyAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
+        """
+        Handle DELETE requests to delete an existing prescription by its primary key (pk).
+
+        Args:
+            request: The HTTP request object.
+            pk: The primary key of the prescription to delete.
+
+        Returns:
+            Response: A Response object with HTTP status code 204 indicating successful deletion.
+        """
         prescription = get_object_or_404(Prescription, pk=pk)
         prescription.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
