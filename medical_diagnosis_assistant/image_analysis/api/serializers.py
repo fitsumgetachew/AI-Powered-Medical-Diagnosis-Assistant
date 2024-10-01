@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from ..models import *
-
 class MedicalImageSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -18,3 +17,4 @@ class ImageAnalysisResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = ImageAnalysisResult
         fields = ['medical_image', 'result', 'abnormality_detected', 'confidence_score', 'analyzed_at']
+

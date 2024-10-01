@@ -1,0 +1,66 @@
+/* DrugManagement.css */
+
+.drug-management-container {
+  max-width: 600px; /* Limit the width of the form */
+  margin: 0 auto; /* Center the form */
+  padding: 20px; /* Add padding */
+  background-color: #f9f9f9; /* Light background color */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+h2 {
+  text-align: center; /* Center the title */
+  color: #333; /* Dark text color */
+}
+
+.drug-form {
+  display: flex;
+  flex-direction: column; /* Stack elements vertically */
+}
+
+.form-group {
+  margin-bottom: 15px; /* Space between form groups */
+}
+
+label {
+  margin-bottom: 5px; /* Space between label and input */
+  font-weight: bold; /* Bold labels */
+  color: #555; /* Medium text color */
+}
+
+.form-input {
+  width: 100%; /* Full width inputs */
+  padding: 10px; /* Padding inside inputs */
+  border: 1px solid #ccc; /* Light border */
+  border-radius: 4px; /* Rounded corners */
+  font-size: 14px; /* Font size */
+}
+
+.form-input:focus {
+  border-color: #007bff; /* Border color on focus */
+  outline: none; /* Remove default outline */
+}
+
+.submit-button {
+  padding: 10px; /* Padding inside button */
+  background-color: #007bff; /* Primary button color */
+  color: white; /* White text */
+  border: none; /* Remove border */
+  border-radius: 4px; /* Rounded corners */
+  cursor: pointer; /* Pointer cursor on hover */
+  font-size: 16px; /* Font size */
+}
+
+.submit-button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+.error-message {
+    color: red;
+    margin-bottom: 20px;
+}
+
+.error-details {
+    font-size: 0.9em;
+    color: darkred;
+}

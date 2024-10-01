@@ -10,10 +10,26 @@ const SymptomAnalysis = () => {
   const [userMessage, setUserMessage] = useState('');
   const [analysisResult, setAnalysisResult] = useState('');
   const [analysisVisible, setAnalysisVisible] = useState(false);
+  const [userInfo, setUserInfo] = useState(null); // State to hold user information
 
   useEffect(() => {
-    fetchConversations();
+    fetchUserInfo(); // Fetch user info on component mount
+    fetchConversations(); // Fetch conversations on component mount
   }, []);
+
+  const fetchUserInfo = () => {
+  const userInfoFromStorage = localStorage.getItem('userInfo');
+  if (userInfoFromStorage) {
+    try {
+      const parsedUserInfo = JSON.parse(userInfoFromStorage);
+      setUserInfo(parsedUserInfo);
+    } catch (error) {
+      console.error('Error parsing user info:', error);
+      // Optionally clear the bad data
+      localStorage.removeItem('userInfo');
+    }
+  }
+};
 
   const fetchConversations = async () => {
     try {
@@ -40,8 +56,8 @@ const SymptomAnalysis = () => {
   };
 
   const sendMessage = async () => {
-    if (!userMessage.trim()) return;
-    setChatMessages([...chatMessages, { user: userMessage, ai: '' }]);
+    if (!userMessage.trim()) return; // Prevent sending empty messages
+    setChatMessages((prevMessages) => [...prevMessages, { user: userMessage, ai: '' }]);
     setUserMessage('');
 
     try {
@@ -49,12 +65,13 @@ const SymptomAnalysis = () => {
         conversation_id: currentConversationId,
         user_message: userMessage,
       });
-      setChatMessages([...chatMessages, { user: userMessage, ai: response.data.ai_response }]);
-      setCurrentConversationId(response.data.conversation.pk);
-      fetchConversations();
+      const { ai_response, conversation } = response.data;
+      setChatMessages((prevMessages) => [...prevMessages, { user: userMessage, ai: ai_response }]);
+      setCurrentConversationId(conversation.pk);
+      fetchConversations(); // Refresh conversations after sending a message
     } catch (error) {
       console.error('Error sending message:', error);
-      setChatMessages([...chatMessages, { user: userMessage, ai: 'Error processing your message' }]);
+      setChatMessages((prevMessages) => [...prevMessages, { user: userMessage, ai: 'Error processing your message' }]);
     }
   };
 
@@ -74,6 +91,7 @@ const SymptomAnalysis = () => {
 
   return (
     <div className="chat-container">
+      {userInfo && <div className="user-info">Welcome, {userInfo.first_name}!</div>} {/* Display user info */}
       <Sidebar
         conversations={conversations}
         loadConversation={loadConversation}

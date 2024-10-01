@@ -73,3 +73,8 @@
 .analysis-result strong {
     color: var(--secondary-dark);
 }
+.error-message {
+    color: red;
+    margin: 10px 0;
+    font-weight: bold;
+}

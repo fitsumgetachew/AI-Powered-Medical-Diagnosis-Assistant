@@ -42,11 +42,13 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await sendRequest('/users/login/', 'POST', { email, password });
+      const response = await sendRequest('users/login/', 'POST', { email, password }); // Removed hardcoded URL
       if (response.ok) {
+        // Store tokens and user information
         localStorage.setItem('access_token', response.data.access);
         localStorage.setItem('refresh_token', response.data.refresh);
         localStorage.setItem('is_doctor', response.data.is_doctor);
+        localStorage.setItem('userInfo', JSON.stringify(response.data.user)); // Assuming you get user info in response
         navigate('/dashboard');
       } else {
         alert('Login failed. Please check your credentials.');
@@ -107,7 +109,7 @@ const Register = () => {
 
     const initializeGoogleSignIn = () => {
       google.accounts.id.initialize({
-        client_id: '836345213785-7ahselh9p78a93lu7gofpb07venfcmba.apps.googleusercontent.com',
+        client_id: 'YOUR_CLIENT_ID.apps.googleusercontent.com', // Replace with your actual client ID
         callback: handleCredentialResponse,
       });
 
@@ -121,7 +123,7 @@ const Register = () => {
 
     const handleCredentialResponse = (response) => {
       const idToken = response.credential;
-      sendRequest('/users/google_auth/', 'POST', { idToken })
+      sendRequest('users/google_auth/', 'POST', { idToken })
         .then(res => {
           if (res.ok) {
             localStorage.setItem('access_token', res.data.access);
@@ -141,7 +143,7 @@ const Register = () => {
 
   const handleSendOtp = async () => {
     try {
-      const response = await sendRequest('/users/send_otp/', 'POST', { email });
+      const response = await sendRequest('users/send_otp/', 'POST', { email });
       if (response.ok) {
         setOtpSent(true);
         alert('OTP sent to your email.');
@@ -161,7 +163,7 @@ const Register = () => {
     }
 
     try {
-      const response = await sendRequest('/users/register/', 'POST', {
+      const response = await sendRequest('users/register/', 'POST', {
         email,
         password,
         first_name: firstName,
@@ -251,7 +253,6 @@ const Register = () => {
   );
 };
 
-
 // User Profile Component
 const UserProfile = () => {
   const [profile, setProfile] = useState(null);
@@ -262,7 +263,7 @@ const UserProfile = () => {
 
   const fetchProfile = async () => {
     try {
-      const response = await sendRequest('/users/profile/', 'GET');
+      const response = await sendRequest('users/profile/', 'GET'); // Removed hardcoded URL
       if (response.ok) {
         setProfile(response.data);
         setFirstName(response.data.first_name);
@@ -278,7 +279,7 @@ const UserProfile = () => {
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     try {
-      const response = await sendRequest('/users/profile/', 'PUT', {
+      const response = await sendRequest('users/profile/', 'PUT', {
         first_name: firstName,
         last_name: lastName,
       });

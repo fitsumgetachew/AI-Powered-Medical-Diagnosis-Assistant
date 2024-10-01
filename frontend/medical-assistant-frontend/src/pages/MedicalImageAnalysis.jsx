@@ -9,9 +9,11 @@ const MedicalImageAnalysis = () => {
   const [bodyPart, setBodyPart] = useState('');
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(''); // State for error messages
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
+    setErrorMessage(''); // Clear error message on file change
   };
 
   const handleAnalysisTypeChange = (e) => {
@@ -24,16 +26,17 @@ const MedicalImageAnalysis = () => {
 
   const handleBodyPartChange = (e) => {
     setBodyPart(e.target.value);
+    setErrorMessage(''); // Clear error message on body part change
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!file) {
-      alert('Please select an image file');
+      setErrorMessage('Please select an image file.');
       return;
     }
     if (!bodyPart) {
-      alert('Please enter the body part');
+      setErrorMessage('Please enter the body part.');
       return;
     }
 
@@ -72,9 +75,16 @@ const MedicalImageAnalysis = () => {
       });
 
       setResult(response.data);
+      setErrorMessage(''); // Clear error message on success
     } catch (error) {
       console.error('Error during image analysis:', error);
-      alert('An error occurred during image analysis. Please try again.');
+      if (error.response) {
+        // Server responded with a status other than 2xx
+        setErrorMessage(`Error: ${error.response.data.message || 'An error occurred during image analysis. Please try again.'}`);
+      } else {
+        // Network or other error
+        setErrorMessage('An error occurred. Please check your internet connection and try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -83,6 +93,7 @@ const MedicalImageAnalysis = () => {
   return (
     <div className="medical-image-analysis">
       <h2>Medical Image Analysis</h2>
+      {errorMessage && <div className="error-message">{errorMessage}</div>} {/* Error message display */}
       <form onSubmit={handleSubmit}>
         <div>
           <label htmlFor="image-upload">Upload Medical Image:</label>

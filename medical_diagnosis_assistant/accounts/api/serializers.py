@@ -101,3 +101,12 @@ class ChangePasswordSerializer(serializers.Serializer):
         if data['new_password'] != data['confirm_password']:
             raise serializers.ValidationError({"confirm_password": "Password fields didn't match."})
         return data
+
+# User serializer
+class UserSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the User model.
+    """
+    class Meta:
+        model = User
+        fields = '__all__'

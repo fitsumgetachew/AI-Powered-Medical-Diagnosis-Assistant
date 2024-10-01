@@ -1,8 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Header from './components/Header';
-import Footer from './components/Footer';
-import './App.css';
+import PublicLayout from './layouts/PublicLayout';
+import PrivateLayout from './layouts/PrivateLayout';
 import HomePage from "./pages/HomePage.jsx";
 import SymptomAnalysis from "./pages/SymptomAnalysis.jsx";
 
@@ -12,6 +11,8 @@ const MedicalImageAnalysis = lazy(() => import('./pages/MedicalImageAnalysis'));
 const Login = lazy(() => import('./components/AuthComponents').then(module => ({ default: module.Login })));
 const Register = lazy(() => import('./components/AuthComponents').then(module => ({ default: module.Register })));
 const UserProfile = lazy(() => import('./components/AuthComponents').then(module => ({ default: module.UserProfile })));
+const PrescriptionForm = lazy(() => import('./pages/PrescriptionForm')); // New PrescriptionForm page
+const DrugManagement = lazy(() => import('./pages/DrugManagement')); // New DrugManagement page
 
 const Loading = () => (
   <div className="loading">
@@ -24,22 +25,23 @@ function App() {
   return (
     <Router>
       <div className="App">
-        <Header />
-        <main>
-          {/* Suspense component to show fallback while loading */}
-          <Suspense fallback={<Loading />}>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path='/symptom-analysis' element={<SymptomAnalysis />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/medical-image" element={<MedicalImageAnalysis />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/profile" element={<UserProfile />} />
-            </Routes>
-          </Suspense>
-        </main>
-        <Footer />
+        <Suspense fallback={<Loading />}>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<PublicLayout><HomePage /></PublicLayout>} />
+            <Route path="/login" element={<PublicLayout><Login /></PublicLayout>} />
+            <Route path="/register" element={<PublicLayout><Register /></PublicLayout>} />
+
+            {/* Private Routes */}
+            <Route path="/dashboard" element={<PrivateLayout><Dashboard /></PrivateLayout>} />
+            <Route path="/medical-image" element={<PrivateLayout><MedicalImageAnalysis /></PrivateLayout>} />
+            <Route path="/prescription" element={<PrivateLayout><PrescriptionForm /></PrivateLayout>} />
+            <Route path="/drug-management" element={<PrivateLayout><DrugManagement /></PrivateLayout>} />
+            <Route path="/profile" element={<PrivateLayout><UserProfile /></PrivateLayout>} />
+              <Route path="/symptom-analysis" element={<PrivateLayout><SymptomAnalysis /></PrivateLayout>} />
+            {/*<Route path="/drug-interaction" element={<PrivateLayout><DrugInteraction /></PrivateLayout>} />*/}
+          </Routes>
+        </Suspense>
       </div>
     </Router>
   );

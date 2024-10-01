@@ -9,5 +9,4 @@ urlpatterns = [
     path('oral-cancer/', views.OralCancerTestView.as_view(), name='oral_cancer'),
     path('results/', views.AnalysisResultsView.as_view(), name='results'),
     path('results/<int:pk>/', views.AnalysisResultDetailView.as_view(), name='result_detail'),
-
 ]

@@ -12,10 +12,10 @@ function Header() {
           <Link to="/medical-image">Medical Image Analysis</Link>
           <Link to="/symptom-analysis">Symptom Analysis</Link>
           <Link to="/prescription">Prescription</Link>
+          <Link to="/drug-management">Drug Management</Link> {/* New Drug Management link */}
         </div>
         <div className="user-actions">
           <Link to="/profile">Profile</Link>
-          <Link to="/login">Login</Link>
         </div>
       </nav>
     </header>
