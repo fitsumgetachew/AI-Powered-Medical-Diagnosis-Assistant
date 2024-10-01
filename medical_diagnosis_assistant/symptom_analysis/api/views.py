@@ -1,7 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.shortcuts import get_object_or_404
@@ -12,11 +11,21 @@ from .serializers import (
     SymptomAnalysisSerializer,
     ConversationDetailSerializer
 )
-from .utils import symptom_analyzer , analysis_result_chain, generate_conversation_name, extract_symptoms_from_text
+from .utils import symptom_analyzer, analysis_result_chain, generate_conversation_name, extract_symptoms_from_text
 from patient_records.models import PatientHistory
 
 
 class ChatResponseView(APIView):
+    """
+    API view to handle user messages and provide AI responses in a conversational manner.
+
+    Attributes:
+        authentication_classes (list): JWT authentication.
+        permission_classes (list): Ensures the user is authenticated.
+
+    Methods:
+        post(request): Handles user messages, fetches or creates a conversation, and returns an AI response.
+    """
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -25,16 +34,14 @@ class ChatResponseView(APIView):
         user_message = request.data.get('user_message')
 
         if conversation_id:
-            conversation = get_object_or_404(Conversation, pk=conversation_id)# user=request.user)
+            conversation = get_object_or_404(Conversation, pk=conversation_id)
             history = {
                 'user_message': conversation.user_message,
                 'ai_response': conversation.ai_response
             }
         else:
-            print("new")
             conversation_name = generate_conversation_name(user_message)
-            conversation = Conversation.objects.create(user=request.user , name = conversation_name)
-            print("created")
+            conversation = Conversation.objects.create(user=request.user, name=conversation_name)
             history = {'user_message': [], 'ai_response': []}
 
         new_ai_response = symptom_analyzer(user_message=user_message, history=history)
@@ -48,16 +55,36 @@ class ChatResponseView(APIView):
 
 
 class ConversationListView(APIView):
+    """
+    API view to list all conversations for a user.
+
+    Attributes:
+        authentication_classes (list): JWT authentication.
+        permission_classes (list): Ensures the user is authenticated.
+
+    Methods:
+        get(request): Retrieves a list of all conversations.
+    """
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        conversations = Conversation.objects.all()#filter(user=request.user)
+        conversations = Conversation.objects.all()
         serializer = ConversationListSerializer(conversations, many=True)
         return Response(serializer.data)
 
 
 class ConversationDetailView(APIView):
+    """
+    API view to retrieve the details of a specific conversation.
+
+    Attributes:
+        authentication_classes (list): JWT authentication.
+        permission_classes (list): Ensures the user is authenticated.
+
+    Methods:
+        get(request, conversation_id): Retrieves the details of a specific conversation by ID.
+    """
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -68,6 +95,16 @@ class ConversationDetailView(APIView):
 
 
 class AnalyzeSymptomView(APIView):
+    """
+    API view to analyze symptoms from a conversation and generate an analysis result.
+
+    Attributes:
+        authentication_classes (list): JWT authentication.
+        permission_classes (list): Ensures the user is authenticated.
+
+    Methods:
+        post(request): Analyzes symptoms from a conversation and creates a SymptomAnalysis instance.
+    """
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -104,6 +141,16 @@ class AnalyzeSymptomView(APIView):
 
 
 class SaveToHistoryView(APIView):
+    """
+    API view to save a symptom analysis to the patient's medical history.
+
+    Attributes:
+        authentication_classes (list): JWT authentication.
+        permission_classes (list): Ensures the user is authenticated.
+
+    Methods:
+        post(request): Saves a SymptomAnalysis instance to the user's medical history.
+    """
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -111,13 +158,11 @@ class SaveToHistoryView(APIView):
         user = request.user
         symptom_analysis_id = request.data.get('symptom_analysis_id')
 
-
         symptom_analysis = get_object_or_404(SymptomAnalysis, id=symptom_analysis_id)
 
         patient_history = PatientHistory.objects.create(
             patient=user,
             symptom_analysis=symptom_analysis,
-
         )
 
         return Response({'status': 'History saved successfully'}, status=status.HTTP_201_CREATED)

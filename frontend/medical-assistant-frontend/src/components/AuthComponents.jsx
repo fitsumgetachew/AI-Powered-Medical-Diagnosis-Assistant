@@ -84,66 +84,33 @@ const Login = () => {
   );
 };
 
-// Registration Component
 const Register = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [otp, setOtp] = useState('');
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    firstName: '',
+    lastName: '',
+    otp: '',
+    isDoctor: false,
+    specialization: '',
+    licenseNumber: '',
+    yearsOfExperience: '',
+  });
   const [otpSent, setOtpSent] = useState(false);
-  const [isDoctor, setIsDoctor] = useState(false);
   const navigate = useNavigate();
 
-  // Load Google Sign-In script dynamically
-  useEffect(() => {
-    const loadGoogleSignInScript = () => {
-      const script = document.createElement('script');
-      script.src = 'https://accounts.google.com/gsi/client';
-      script.async = true;
-      script.defer = true;
-      script.onload = initializeGoogleSignIn;
-      document.body.appendChild(script);
-    };
-
-    const initializeGoogleSignIn = () => {
-      google.accounts.id.initialize({
-        client_id: 'YOUR_CLIENT_ID.apps.googleusercontent.com', // Replace with your actual client ID
-        callback: handleCredentialResponse,
-      });
-
-      google.accounts.id.renderButton(
-        document.getElementById('buttonDiv'),
-        { theme: 'outline', size: 'large' }
-      );
-
-      google.accounts.id.prompt();
-    };
-
-    const handleCredentialResponse = (response) => {
-      const idToken = response.credential;
-      sendRequest('users/google_auth/', 'POST', { idToken })
-        .then(res => {
-          if (res.ok) {
-            localStorage.setItem('access_token', res.data.access);
-            localStorage.setItem('refresh_token', res.data.refresh);
-            localStorage.setItem('is_doctor', res.data.is_doctor);
-            alert('Login successful!');
-            navigate(res.data.is_doctor ? '/doctor_dashboard' : '/patient_dashboard');
-          } else {
-            alert('Error: ' + res.data.message);
-          }
-        })
-        .catch(error => console.error('Error during sign-in:', error));
-    };
-
-    loadGoogleSignInScript();
-  }, [navigate]);
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
 
   const handleSendOtp = async () => {
     try {
-      const response = await sendRequest('users/send_otp/', 'POST', { email });
+      const response = await sendRequest('users/send_otp/', 'POST', { email: formData.email });
       if (response.ok) {
         setOtpSent(true);
         alert('OTP sent to your email.');
@@ -157,25 +124,34 @@ const Register = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    if (password !== confirmPassword) {
+    if (formData.password !== formData.confirmPassword) {
       alert("Passwords do not match.");
       return;
     }
 
+    const registrationData = {
+      email: formData.email,
+      password: formData.password,
+      confirm_password:formData.confirmPassword,
+      first_name: formData.firstName,
+      last_name: formData.lastName,
+      otp: formData.otp,
+      is_doctor: formData.isDoctor
+    };
+
+    if (formData.isDoctor) {
+      registrationData.specialization = formData.specialization;
+      registrationData.license_number = formData.licenseNumber;
+      registrationData.years_of_experience = parseInt(formData.yearsOfExperience);
+    }
+
     try {
-      const response = await sendRequest('users/register/', 'POST', {
-        email,
-        password,
-        first_name: firstName,
-        last_name: lastName,
-        otp,
-        is_doctor: isDoctor
-      });
+      const response = await sendRequest('users/register/', 'POST', registrationData);
       if (response.ok) {
         alert('Account created successfully. Please log in.');
         navigate('/login');
       } else {
-        alert('Registration failed. Please check your information and try again.');
+        alert(response.data.message || 'Registration failed. Please check your information and try again.');
       }
     } catch (error) {
       console.error('Registration error:', error);
@@ -188,23 +164,26 @@ const Register = () => {
       <form onSubmit={handleRegister}>
         <input
           type="text"
+          name="firstName"
           placeholder="First Name"
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
+          value={formData.firstName}
+          onChange={handleInputChange}
           required
         />
         <input
           type="text"
+          name="lastName"
           placeholder="Last Name"
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
+          value={formData.lastName}
+          onChange={handleInputChange}
           required
         />
         <input
           type="email"
+          name="email"
           placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={formData.email}
+          onChange={handleInputChange}
           required
         />
         {!otpSent ? (
@@ -212,39 +191,72 @@ const Register = () => {
         ) : (
           <input
             type="text"
+            name="otp"
             placeholder="OTP"
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
+            value={formData.otp}
+            onChange={handleInputChange}
             required
           />
         )}
         <input
           type="password"
+          name="password"
           placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          value={formData.password}
+          onChange={handleInputChange}
           required
         />
         <input
           type="password"
+          name="confirmPassword"
           placeholder="Confirm Password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
+          value={formData.confirmPassword}
+          onChange={handleInputChange}
           required
         />
         <div className="checkbox-container">
           <input
             type="checkbox"
             id="is_doctor"
-            checked={isDoctor}
-            onChange={() => setIsDoctor(!isDoctor)}
+            name="isDoctor"
+            checked={formData.isDoctor}
+            onChange={handleInputChange}
           />
           <label htmlFor="is_doctor">I am a doctor</label>
         </div>
+
+        {formData.isDoctor && (
+          <div className="doctor-fields">
+            <input
+              type="text"
+              name="specialization"
+              placeholder="Specialization"
+              value={formData.specialization}
+              onChange={handleInputChange}
+              required
+            />
+            <input
+              type="text"
+              name="licenseNumber"
+              placeholder="License Number"
+              value={formData.licenseNumber}
+              onChange={handleInputChange}
+              required
+            />
+            <input
+              type="number"
+              name="yearsOfExperience"
+              placeholder="Years of Experience"
+              value={formData.yearsOfExperience}
+              onChange={handleInputChange}
+              required
+              min="0"
+            />
+          </div>
+        )}
+
         <button type="submit" disabled={!otpSent}>Register</button>
       </form>
-
-      <div className="google-btn" id="buttonDiv"></div>
 
       <div className="login-link">
         <p>Already have an account? <a href="/login">Log in</a></p>
@@ -252,6 +264,7 @@ const Register = () => {
     </div>
   );
 };
+
 
 // User Profile Component
 const UserProfile = () => {

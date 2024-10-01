@@ -57,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         localStorage.setItem('access_token', res.data.access);
                         localStorage.setItem('refresh_token', res.data.refresh);
                         localStorage.setItem('is_doctor', res.data.is_doctor);
+                        console.log("Login successful!")
                         showMessage('Login successful!');
                         // Redirect to appropriate dashboard based on user type
                         window.location.href = res.data.is_doctor ? 'landing_page.html' : 'landing_page.html';

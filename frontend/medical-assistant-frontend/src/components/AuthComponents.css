@@ -134,3 +134,90 @@
 .logout-button:hover {
   background-color: darkred; /* Darker shade on hover */
 }
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.modal-header h3 {
+  margin: 0;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+}
+
+.modal-content {
+  padding: 1rem;
+}
+
+.doctors-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.doctor-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 1rem;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  background: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 100%;
+  text-align: left;
+}
+
+.doctor-item:hover {
+  background-color: #f8f9fa;
+}
+
+.doctor-item h4 {
+  margin: 0 0 0.5rem 0;
+}
+
+.doctor-item p {
+  margin: 0 0 0.25rem 0;
+  color: #495057;
+}
+
+.doctor-item span {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+/* Ensure existing modal doesn't conflict with new modal */
+.dashboard-container {
+  position: relative;
+}
