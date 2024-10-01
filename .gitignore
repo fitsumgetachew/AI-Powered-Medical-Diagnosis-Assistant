@@ -1,1 +1,3 @@
 /medicalAssistant/
+/medical_diagnosis_assistant/.env
+/medical_diagnosis_assistant/db.sqlite3
