@@ -1,8 +1,13 @@
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from langchain_openai import ChatOpenAI
+from dotenv import load_dotenv
+import os
 
-llm = ChatOpenAI(name = 'gpt-4o-mini', openai_api_key = '')
+load_dotenv()
+api_key = os.getenv('API_KEY')
+llm = ChatOpenAI(name = 'gpt-4o-mini', openai_api_key = api_key)
+
 def symptom_analyzer(user_message, history):
     template = """
     You are a medical chatbot specialized in symptom analysis. Your role is to provide informative and helpful responses to users describing their symptoms. 
