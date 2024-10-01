@@ -10,7 +10,7 @@ COPY medical-assistant-frontend/package-lock.json /app/
 RUN npm install
 
 # Copy the React project files
-COPY ./medical-assistant-frontend /app/
+COPY medical-assistant-frontend /app/
 
 # Build the React project
 RUN npm run build
