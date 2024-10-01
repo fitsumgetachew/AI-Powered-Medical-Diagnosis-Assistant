@@ -6,8 +6,10 @@ from ..models import Drug
 from .serializers import DrugSerializer
 from ..models import Prescription
 from .serializers import PrescriptionSerializer
-
-
+from dotenv import load_dotenv
+import os
+load_dotenv()
+api_key = os.getenv('API_KEY')
 class DrugAPIView(APIView):
     """
     API view to handle GET, POST, and PATCH requests for the Drug model.
@@ -217,7 +219,7 @@ class DrugInteractionAPIView(APIView):
 
         # Initialize the LLM
         llm = ChatOpenAI(name='gpt-4o-mini',
-                         openai_api_key='')
+                         openai_api_key=api_key)
         template = """
         Check for interactions between the following drugs: {prescription_drugs}
         """
