@@ -9,7 +9,7 @@ services:
     volumes:
       - ./medical_diagnosis_assistant:/app
     expose:
-      - "8000"
+      - "8000:8000"
     env_file:
       - ./medical_diagnosis_assistant/.env  # Optional, if you want to use environment variables
     networks:
