@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MediAI - Your AI-Powered Medical Assistant{% endblock %}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --primary-dark: #2980b9;
+            --secondary-color: #2ecc71;
+            --secondary-dark: #27ae60;
+            --text-color: #333;
+            --bg-color: #f4f4f4;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .bg-primary { background-color: var(--primary-color); }
+        .bg-secondary { background-color: var(--secondary-color); }
+        .text-primary { color: var(--primary-color); }
+        .hover\:bg-primary-dark:hover { background-color: var(--primary-dark); }
+        .hover\:bg-secondary-dark:hover { background-color: var(--secondary-dark); }
+    </style>
+    {% block extra_styles %}{% endblock %}
+</head>
+<body class="flex flex-col min-h-screen">
+    <header class="bg-white shadow-md">
+        <nav class="container mx-auto px-6 py-3">
+            <div class="flex justify-between items-center">
+                <div class="text-xl font-bold text-primary">
+                    <a href="/">MediAI</a>
+                </div>
+                <div class="hidden md:flex space-x-4">
+                    <a href="/" class="text-gray-600 hover:text-primary">Dashboard</a>
+                    <a href="#medical-image" class="text-gray-600 hover:text-primary">Medical Image Analysis</a>
+                    <a href="/chatbot" class="text-gray-600 hover:text-primary">Symptom Analysis</a>
+                    <a href="#drug-interaction" class="text-gray-600 hover:text-primary">Drug Interaction</a>
+                </div>
+                <div class="flex items-center">
+                    <a href="#profile" class="text-gray-600 hover:text-primary mr-4">Profile</a>
+                    <a href="#logout" class="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition duration-300">Logout</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p>&copy; 2024 MediAssist AI. All rights reserved.</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#" class="hover:text-primary">Privacy Policy</a>
+                    <a href="#" class="hover:text-primary">Terms of Service</a>
+                    <a href="#" class="hover:text-primary">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

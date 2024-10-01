@@ -1,13 +1,15 @@
 from django.urls import path
 from . import views
-urlpatterns =[
-    path('register/' , views.create_account , name='create_account'),
-    path('login/' , views.login , name= 'login'),
-    path('logout/' , views.logout , name= 'logout'),
-    path('profile/' , views.user_profile , name = 'profile'),
-    path('change_password/' , views.change_password , name ='change-password'),
-    path('send_otp/' , views.send_otp),
-    path('forget_password/' , views.forget_password),
-    path('google_auth/' , views.google_login),
+
+urlpatterns = [
+    path('register/', views.CreateAccountView.as_view(), name='create_account'),
+    path('login/', views.LoginView.as_view(), name='login'),
+    path('logout/', views.LogoutView.as_view(), name='logout'),
+    path('profile/', views.UserProfileView.as_view(), name='profile'),
+    path('change_password/', views.ChangePasswordView.as_view(), name='change-password'),
+    path('send_otp/', views.SendOTPView.as_view(), name='send-otp'),
+    path('forget_password/', views.ForgetPasswordView.as_view(), name='forget-password'),
+    path('google_auth/', views.GoogleLoginView.as_view(), name='google-auth'),
     path('list/', views.user_list, name='user-list'),  # Adjust the URL as necessary
-    ]
+
+]
