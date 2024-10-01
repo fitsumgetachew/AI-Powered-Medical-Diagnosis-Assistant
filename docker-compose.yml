@@ -8,8 +8,8 @@ services:
     command: gunicorn --bind 0.0.0.0:8000 medical_diagnosis_assistant.wsgi:application
     volumes:
       - ./medical_diagnosis_assistant:/app
-    expose:
-      - "8000:8000"
+    ports:
+      - "8000:8000"  # This exposes the backend to the host
     env_file:
       - ./medical_diagnosis_assistant/.env  # Optional, if you want to use environment variables
     networks:
@@ -21,8 +21,6 @@ services:
     container_name: react_app
     volumes:
       - ./frontend/dist:/usr/share/nginx/html
-    ports:
-      - "80:80"
     networks:
       - app-network
 
