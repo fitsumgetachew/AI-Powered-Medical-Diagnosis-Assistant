@@ -10,6 +10,6 @@ urlpatterns = [
     path('send_otp/', views.SendOTPView.as_view(), name='send-otp'),
     path('forget_password/', views.ForgetPasswordView.as_view(), name='forget-password'),
     path('google_auth/', views.GoogleLoginView.as_view(), name='google-auth'),
-    path('list/', views.user_list, name='user-list'),  # Adjust the URL as necessary
+    path('list/', views.user_list, name='user-list'),
 
 ]

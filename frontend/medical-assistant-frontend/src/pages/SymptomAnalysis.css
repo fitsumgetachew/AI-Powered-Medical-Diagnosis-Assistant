@@ -69,3 +69,108 @@ button:hover {
 .fixed {
   position: fixed;
 }
+
+.analyze-button {
+  background-color: #8fa2a4;
+
+}
+
+.analyze-button.analyzing,
+.save-button.saving {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Analysis modal enhancements */
+.analysis-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.analysis-content {
+  background-color: #ffffff;
+  padding: 24px;
+  border-radius: 8px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.symptoms-list {
+  margin-bottom: 16px;
+}
+
+.symptoms-list ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.symptoms-list li {
+  margin-bottom: 4px;
+  padding: 4px 8px;
+  background-color: #b3adad;
+  border-radius: 4px;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.analysis-text {
+  margin-bottom: 24px;
+}
+
+.analysis-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.save-button, .close-button {
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.save-button {
+  background-color: #4cafa2;
+  color: #6fd1dd;
+  border: none;
+}
+
+.save-button:hover {
+  background-color: #4dbbee;
+}
+
+.close-button {
+  background-color:  #8fa2a4;
+  border: 1px solid #ccc;
+}
+
+.close-button:hover {
+  background-color: #5ec2c5;
+}

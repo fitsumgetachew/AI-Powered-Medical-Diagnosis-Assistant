@@ -25,5 +25,6 @@ urlpatterns = [
     path('symptom/' , include('symptom_analysis.api.urls')),
     path('analysis/', include('image_analysis.api.urls')),
     path('prescriptions/', include('prescriptions.api.urls')),
+    path('history/' , include('patient_records.api.urls'))
 
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

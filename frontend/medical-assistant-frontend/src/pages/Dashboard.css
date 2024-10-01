@@ -1,66 +1,209 @@
 /* Dashboard.css */
-.dashboard {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive grid */
-    gap: 2rem; /* Space between cards */
-    padding: 2rem; /* Outer padding */
-    background-color: var(--bg-color); /* Background color */
-    width: 100%; /* Ensure full width */
+.dashboard-container {
+  padding: 2rem;
 }
 
-.dashboard-card {
-    background-color: var(--card-bg); /* Card background color */
-    padding: 1.5rem; /* Inner padding */
-    border-radius: 8px; /* Rounded corners */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow */
-    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transitions */
-    text-align: center; /* Center text inside cards */
-    overflow: hidden; /* Prevent overflow */
+.analysis-section {
+  margin-bottom: 2rem;
 }
 
-.dashboard-card:hover {
-    transform: translateY(-5px); /* Lift card on hover */
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Deeper shadow on hover */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
 }
 
-.dashboard-card h2 {
-    color: var(--primary-color); /* Heading color */
-    margin-bottom: 1rem; /* Space below heading */
+.section-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #333;
 }
 
-.dashboard-card ul {
-    list-style: none; /* Remove default list styling */
-    padding: 0; /* Remove default padding */
-    margin: 0 0 1.5rem; /* Space below list */
+.new-analysis-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #007bff;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 0.875rem;
 }
 
-.dashboard-card ul li {
-    margin-bottom: 0.5rem; /* Space between list items */
+.new-analysis-button:hover {
+  background-color: #0056b3;
 }
 
-.dashboard-card a {
-    display: inline-block; /* Ensure it can take padding */
-    background-color: var(--primary-color); /* Button background color */
-    color: white; /* Button text color */
-    padding: 0.8rem 1.5rem; /* Button padding */
-    border-radius: 5px; /* Rounded corners for button */
-    text-decoration: none; /* Remove underline */
-    font-weight: bold; /* Bold text */
-    transition: background-color 0.3s ease; /* Smooth background transition */
-    cursor: pointer; /* Pointer cursor on hover */
+.boxes-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
 }
 
-.dashboard-card a:hover {
-    background-color: var(--primary-dark); /* Darker color on hover */
+.analysis-box {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Optional: Media query for mobile responsiveness */
-@media (max-width: 600px) {
-    .dashboard {
-        padding: 1rem; /* Reduce padding on smaller screens */
-    }
+.box-date {
+  font-size: 0.875rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
 
-    .dashboard-card {
-        padding: 1rem; /* Adjust card padding for smaller screens */
-    }
+.box-content {
+  flex-grow: 1;
+  margin-bottom: 1rem;
+}
+
+.symptom-tag {
+  display: inline-block;
+  background-color: #e9ecef;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.image-type {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.image-result {
+  font-size: 0.875rem;
+  color: #495057;
+}
+
+.prescription-med {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.prescription-dosage {
+  font-size: 0.875rem;
+  color: #495057;
+}
+
+.share-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.share-button:hover {
+  background-color: #218838;
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 1rem;
+  }
+
+  .boxes-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.modal-header h3 {
+  margin: 0;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+}
+
+.modal-content {
+  padding: 1rem;
+}
+
+.doctors-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.doctor-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 1rem;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  background: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 100%;
+  text-align: left;
+}
+
+.doctor-item:hover {
+  background-color: #f8f9fa;
+}
+
+.doctor-item h4 {
+  margin: 0 0 0.5rem 0;
+}
+
+.doctor-item p {
+  margin: 0 0 0.25rem 0;
+  color: #495057;
+}
+
+.doctor-item span {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+/* Ensure existing modal doesn't conflict with new modal */
+.dashboard-container {
+  position: relative;
 }
