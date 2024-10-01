@@ -86,11 +86,58 @@ const Login = () => {
 const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [otp, setOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
+  const [isDoctor, setIsDoctor] = useState(false);
   const navigate = useNavigate();
+
+  // Load Google Sign-In script dynamically
+  useEffect(() => {
+    const loadGoogleSignInScript = () => {
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      script.onload = initializeGoogleSignIn;
+      document.body.appendChild(script);
+    };
+
+    const initializeGoogleSignIn = () => {
+      google.accounts.id.initialize({
+        client_id: '836345213785-7ahselh9p78a93lu7gofpb07venfcmba.apps.googleusercontent.com',
+        callback: handleCredentialResponse,
+      });
+
+      google.accounts.id.renderButton(
+        document.getElementById('buttonDiv'),
+        { theme: 'outline', size: 'large' }
+      );
+
+      google.accounts.id.prompt();
+    };
+
+    const handleCredentialResponse = (response) => {
+      const idToken = response.credential;
+      sendRequest('/users/google_auth/', 'POST', { idToken })
+        .then(res => {
+          if (res.ok) {
+            localStorage.setItem('access_token', res.data.access);
+            localStorage.setItem('refresh_token', res.data.refresh);
+            localStorage.setItem('is_doctor', res.data.is_doctor);
+            alert('Login successful!');
+            navigate(res.data.is_doctor ? '/doctor_dashboard' : '/patient_dashboard');
+          } else {
+            alert('Error: ' + res.data.message);
+          }
+        })
+        .catch(error => console.error('Error during sign-in:', error));
+    };
+
+    loadGoogleSignInScript();
+  }, [navigate]);
 
   const handleSendOtp = async () => {
     try {
@@ -108,6 +155,11 @@ const Register = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    if (password !== confirmPassword) {
+      alert("Passwords do not match.");
+      return;
+    }
+
     try {
       const response = await sendRequest('/users/register/', 'POST', {
         email,
@@ -115,9 +167,10 @@ const Register = () => {
         first_name: firstName,
         last_name: lastName,
         otp,
+        is_doctor: isDoctor
       });
       if (response.ok) {
-        alert('Account created successfully. Please login.');
+        alert('Account created successfully. Please log in.');
         navigate('/login');
       } else {
         alert('Registration failed. Please check your information and try again.');
@@ -132,20 +185,6 @@ const Register = () => {
       <h2>Register</h2>
       <form onSubmit={handleRegister}>
         <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <input
           type="text"
           placeholder="First Name"
           value={firstName}
@@ -159,6 +198,13 @@ const Register = () => {
           onChange={(e) => setLastName(e.target.value)}
           required
         />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
         {!otpSent ? (
           <button type="button" onClick={handleSendOtp}>Send OTP</button>
         ) : (
@@ -170,11 +216,41 @@ const Register = () => {
             required
           />
         )}
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          required
+        />
+        <div className="checkbox-container">
+          <input
+            type="checkbox"
+            id="is_doctor"
+            checked={isDoctor}
+            onChange={() => setIsDoctor(!isDoctor)}
+          />
+          <label htmlFor="is_doctor">I am a doctor</label>
+        </div>
         <button type="submit" disabled={!otpSent}>Register</button>
       </form>
+
+      <div className="google-btn" id="buttonDiv"></div>
+
+      <div className="login-link">
+        <p>Already have an account? <a href="/login">Log in</a></p>
+      </div>
     </div>
   );
 };
+
 
 // User Profile Component
 const UserProfile = () => {
