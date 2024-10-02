@@ -1,51 +1,84 @@
-nav.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: var(--primary-color); /* Use your primary color for the background */
-    padding: 1rem 2rem; /* Adjust padding as needed */
-    color: white; /* White text for better visibility */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background-color: var(--primary-color);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  max-width: 1650px;
+  margin: 0 auto;
+  width: 100%;
+     border-radius: 10px;
 }
 
 .logo {
-    font-size: 1.8rem;
-    font-weight: bold;
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: white;
 }
 
 .nav-links {
-    display: flex;
-    gap: 2rem; /* Space between links */
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
 }
 
 .nav-links a {
-    color: white; /* White text for better visibility */
-    text-decoration: none;
-    transition: color 0.3s ease;
+  color: white;
+  text-decoration: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
 }
 
 .nav-links a:hover {
-    color: var(--secondary-color); /* Change to secondary color on hover */
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .user-actions {
-    display: flex;
-    gap: 1rem; /* Space between profile and login links */
+  display: flex;
+  align-items: center;
 }
 
-.user-actions a.button {
-    background-color: var(--secondary-color); /* Secondary color for buttons */
-    color: white; /* White text for better visibility */
-    padding: 0.5rem 1rem; /* Button padding */
-    border-radius: 5px; /* Rounded corners */
-    text-decoration: none; /* Remove underline */
-    transition: background-color 0.3s ease, transform 0.2s ease; /* Transitions for effects */
+.profile-link {
+  color: #100000;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.1);
+  transition: background-color 0.3s ease;
 }
 
-.user-actions a.button:hover {
-    background-color: var(--secondary-dark); /* Darken button color on hover */
-    transform: translateY(-2px); /* Slight lift effect on hover */
+.profile-link:hover {
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
-.user-actions a.button:active {
-    transform: translateY(0); /* Reset position on active state */
+/* Responsive design for header */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .nav-links {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  .nav-links a {
+    width: 100%;
+    text-align: center;
+  }
+
+  .user-actions {
+    width: 100%;
+    justify-content: center;
+  }
 }

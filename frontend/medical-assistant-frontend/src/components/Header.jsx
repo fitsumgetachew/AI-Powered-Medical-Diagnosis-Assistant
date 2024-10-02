@@ -2,9 +2,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import './Header.css'; // Importing CSS for styling
 
-function Header() {
+export function Header() {
   return (
-    <header>
+    <header className="header">
       <nav className="navbar">
         <div className="logo">MediAI</div>
         <div className="nav-links">
@@ -12,14 +12,15 @@ function Header() {
           <Link to="/medical-image">Medical Image Analysis</Link>
           <Link to="/symptom-analysis">Symptom Analysis</Link>
           <Link to="/prescription">Prescription</Link>
-          <Link to="/drug-management">Drug Management</Link> {/* New Drug Management link */}
+          <Link to="/drug-management">Drug Management</Link>
         </div>
         <div className="user-actions">
-          <Link to="/profile">Profile</Link>
+          <Link to="/profile" className="profile-link">Profile</Link>
         </div>
       </nav>
     </header>
   );
 }
+
 
 export default Header;

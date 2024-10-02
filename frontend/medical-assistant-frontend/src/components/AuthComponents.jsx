@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { User, Edit2, LogOut, Award, FileText, Clock } from 'lucide-react';
 import './AuthComponents.css'; // Import the stylesheet
 
 const API_BASE_URL = 'http://localhost:8000/';
@@ -266,12 +267,16 @@ const Register = () => {
 };
 
 
-// User Profile Component
 const UserProfile = () => {
   const [profile, setProfile] = useState(null);
   const [editing, setEditing] = useState(false);
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    specialization: '',
+    licenseNumber: '',
+    yearsOfExperience: '',
+  });
   const navigate = useNavigate();
 
   const fetchProfile = async () => {
@@ -279,8 +284,13 @@ const UserProfile = () => {
       const response = await sendRequest('users/profile/', 'GET');
       if (response.ok) {
         setProfile(response.data);
-        setFirstName(response.data.first_name);
-        setLastName(response.data.last_name);
+        setFormData({
+          firstName: response.data.first_name,
+          lastName: response.data.last_name,
+          specialization: response.data.doctor_profile?.specialization || '',
+          licenseNumber: response.data.doctor_profile?.license_number || '',
+          yearsOfExperience: response.data.doctor_profile?.years_of_experience || '',
+        });
       } else {
         alert('Failed to fetch profile. Please try again.');
       }
@@ -289,13 +299,31 @@ const UserProfile = () => {
     }
   };
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
+    const updateData = {
+      first_name: formData.firstName,
+      last_name: formData.lastName,
+    };
+
+    if (profile.doctor_profile) {
+      updateData.doctor_profile = {
+        specialization: formData.specialization,
+        license_number: formData.licenseNumber,
+        years_of_experience: parseInt(formData.yearsOfExperience),
+      };
+    }
+
     try {
-      const response = await sendRequest('users/profile/', 'PUT', {
-        first_name: firstName,
-        last_name: lastName,
-      });
+      const response = await sendRequest('users/profile/', 'PUT', updateData);
       if (response.ok) {
         alert('Profile updated successfully.');
         setEditing(false);
@@ -313,48 +341,160 @@ const UserProfile = () => {
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('is_doctor');
     localStorage.removeItem('userInfo');
-    navigate('/login'); // Redirect to login page
+    navigate('/');
   };
 
   useEffect(() => {
     fetchProfile();
   }, []);
 
-  if (!profile) return <div>Loading...</div>;
+  if (!profile) return (
+    <div className="profile-loading">
+      <div className="loading-spinner"></div>
+      <p>Loading profile...</p>
+    </div>
+  );
 
   return (
-    <div className="user-profile">
-      <h2>User Profile</h2>
+    <div className="profile-container">
+      <div className="profile-header">
+        <div className="profile-avatar">
+          {profile.profile_picture ? (
+            <img src={profile.profile_picture} alt="Profile" />
+          ) : (
+            <User size={40} />
+          )}
+        </div>
+        <h1>{profile.first_name} {profile.last_name}</h1>
+        <p className="email">{profile.email}</p>
+      </div>
+
       {editing ? (
-        <form onSubmit={handleUpdateProfile}>
-          <input
-            type="text"
-            placeholder="First Name"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            required
-          />
-          <input
-            type="text"
-            placeholder="Last Name"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            required
-          />
-          <button type="submit">Save Changes</button>
-          <button type="button" className="cancel-button" onClick={() => setEditing(false)}>Cancel</button>
+        <form onSubmit={handleUpdateProfile} className="edit-form">
+          <div className="form-group">
+            <label>First Name</label>
+            <input
+              type="text"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Last Name</label>
+            <input
+              type="text"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+
+          {profile.doctor_profile && (
+            <>
+              <div className="form-group">
+                <label>Specialization</label>
+                <input
+                  type="text"
+                  name="specialization"
+                  value={formData.specialization}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>License Number</label>
+                <input
+                  type="text"
+                  name="licenseNumber"
+                  value={formData.licenseNumber}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Years of Experience</label>
+                <input
+                  type="number"
+                  name="yearsOfExperience"
+                  value={formData.yearsOfExperience}
+                  onChange={handleInputChange}
+                  required
+                  min="0"
+                />
+              </div>
+            </>
+          )}
+
+          <div className="button-group">
+            <button type="submit" className="save-button">Save Changes</button>
+            <button type="button" className="cancel-button" onClick={() => setEditing(false)}>Cancel</button>
+          </div>
         </form>
       ) : (
-        <div>
-          <p><strong>Email:</strong> {profile.email}</p>
-          <p><strong>First Name:</strong> {profile.first_name}</p>
-          <p><strong>Last Name:</strong> {profile.last_name}</p>
-          <button onClick={() => setEditing(true)}>Edit Profile</button>
+        <div className="profile-content">
+          <div className="profile-section">
+            <h2>Personal Information</h2>
+            <div className="info-grid">
+              <div className="info-item">
+                <strong>First Name:</strong>
+                <span>{profile.first_name}</span>
+              </div>
+              <div className="info-item">
+                <strong>Last Name:</strong>
+                <span>{profile.last_name}</span>
+              </div>
+              <div className="info-item">
+                <strong>Email:</strong>
+                <span>{profile.email}</span>
+              </div>
+            </div>
+          </div>
+
+          {profile.doctor_profile && (
+            <div className="profile-section doctor-info">
+              <h2>Doctor Information</h2>
+              <div className="info-grid">
+                <div className="info-item">
+                  <Award className="icon" />
+                  <div>
+                    <strong>Specialization</strong>
+                    <span>{profile.doctor_profile.specialization}</span>
+                  </div>
+                </div>
+                <div className="info-item">
+                  <FileText className="icon" />
+                  <div>
+                    <strong>License Number</strong>
+                    <span>{profile.doctor_profile.license_number}</span>
+                  </div>
+                </div>
+                <div className="info-item">
+                  <Clock className="icon" />
+                  <div>
+                    <strong>Years of Experience</strong>
+                    <span>{profile.doctor_profile.years_of_experience}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="button-group">
+            <button onClick={() => setEditing(true)} className="edit-button">
+              <Edit2 size={16} />
+              Edit Profile
+            </button>
+            <button onClick={handleLogout} className="logout-button">
+              <LogOut size={16} />
+              Logout
+            </button>
+          </div>
         </div>
       )}
-      <button onClick={handleLogout} className="logout-button">Logout</button> {/* Logout button */}
     </div>
   );
 };
-
 export { Login, Register, UserProfile };
