@@ -5,7 +5,7 @@ import Sidebar from "../components/Sidebar.jsx";
 
 // Create an axios instance with default config
 const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000'
+  baseURL: 'http://34.66.93.187'
 });
 
 // Add a request interceptor to add the token to all requests

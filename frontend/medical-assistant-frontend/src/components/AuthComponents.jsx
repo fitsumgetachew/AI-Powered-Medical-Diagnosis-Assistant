@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { User, Edit2, LogOut, Award, FileText, Clock } from 'lucide-react';
 import './AuthComponents.css'; // Import the stylesheet
 
-const API_BASE_URL = 'http://localhost:8000/';
+const API_BASE_URL = 'http://34.66.93.187/';
 
 // Helper function to handle API requests
 async function sendRequest(endpoint, method = 'GET', data = null) {

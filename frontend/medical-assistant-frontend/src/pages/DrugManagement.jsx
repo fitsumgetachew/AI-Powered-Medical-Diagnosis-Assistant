@@ -22,7 +22,7 @@ const DrugManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://127.0.0.1:8000/prescriptions/drugs', formData);
+      await axios.post('http://34.66.93.187/prescriptions/drugs', formData);
       alert('Drug added successfully');
       setFormData({
         name: '',

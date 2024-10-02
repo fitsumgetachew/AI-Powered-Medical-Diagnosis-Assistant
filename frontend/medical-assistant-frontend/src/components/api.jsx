@@ -1,5 +1,5 @@
 // Base URL for your API
-const API_BASE_URL = 'http://localhost:8000/';
+const API_BASE_URL = 'http://34.66.93.187/';
 
 // Helper function to handle API requests
 async function sendRequest(endpoint, method = 'GET', data = null) {

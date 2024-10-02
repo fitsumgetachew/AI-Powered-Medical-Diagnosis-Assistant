@@ -107,7 +107,7 @@ function Dashboard() {
   const fetchDoctors = async () => {
     try {
       const accessToken = localStorage.getItem('access_token');
-      const response = await axios.get('http://127.0.0.1:8000/history/list-doctors/', {
+      const response = await axios.get('http://34.66.93.187/history/list-doctors/', {
         headers: { Authorization: `Bearer ${accessToken}` }
       });
       setDoctors(response.data);
@@ -126,7 +126,7 @@ function Dashboard() {
       try {
         // Fetch symptom analyses
         const symptomResponse = await axios.get(
-          'http://127.0.0.1:8000/history/symptom-analysis/',
+          'http://34.66.93.187/history/symptom-analysis/',
           { headers }
         );
         setSymptomAnalyses(symptomResponse.data);
@@ -163,7 +163,7 @@ function Dashboard() {
     try {
       const accessToken = localStorage.getItem('access_token');
       await axios.post(
-        'http://127.0.0.1:8000/history/share/',
+        'http://34.66.93.187/history/share/',
         {
           doctor_user_id: doctorUserId,
           patient_history_id: analysisId
