@@ -27,7 +27,7 @@ const PrescriptionForm = () => {
 
   const fetchPatients = async () => {
     try {
-      const response = await axios.get('http://34.66.93.187/users/list');
+      const response = await axios.get('http://127.0.0.1:8000/users/list');
       setPatients(response.data);
       console.log(response.data);
       setLoadingPatients(false);
@@ -41,7 +41,7 @@ const PrescriptionForm = () => {
 
   const fetchDrugs = async () => {
     try {
-      const response = await axios.get('http://34.66.93.187/prescriptions/drugs/');
+      const response = await axios.get('http://127.0.0.1:8000/prescriptions/drugs/');
       setDrugs(response.data);
       setLoadingDrugs(false);
     } catch (error) {
@@ -67,7 +67,7 @@ const PrescriptionForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://34.66.93.187/prescriptions/prescriptions/', formData);
+      await axios.post('http://127.0.0.1:8000/prescriptions/prescriptions/', formData);
       alert('Prescription saved successfully');
     } catch (error) {
       console.error('Error saving prescription:', error);
@@ -78,7 +78,7 @@ const PrescriptionForm = () => {
 
   const checkDrugInteractions = async () => {
     try {
-      const response = await axios.post('http://34.66.93.187/prescriptions/drug-interactions/', { prescription_drugs: formData.drugs });
+      const response = await axios.post('http://127.0.0.1:8000/prescriptions/drug-interactions/', { prescription_drugs: formData.drugs });
       setInteractionResult(response.data.interactions);
     } catch (error) {
       console.error('Error checking drug interactions:', error);

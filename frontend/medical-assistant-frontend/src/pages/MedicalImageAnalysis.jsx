@@ -50,19 +50,19 @@ const MedicalImageAnalysis = () => {
       let endpoint;
       switch (analysisType) {
         case 'tuberculosis':
-          endpoint = 'http://34.66.93.187/analysis/tuberculosis/';
+          endpoint = 'http://127.0.0.1:8000/analysis/tuberculosis/';
           break;
         case 'pneumonia':
-          endpoint = 'http://34.66.93.187/analysis/pneumonia/';
+          endpoint = 'http://127.0.0.1:8000/analysis/pneumonia/';
           break;
         case 'bone-fracture':
-          endpoint = 'http://34.66.93.187/analysis/bones-fracture/';
+          endpoint = 'http://127.0.0.1:8000/analysis/bones-fracture/';
           break;
         case 'breast-cancer':
-          endpoint = 'http://34.66.93.187/analysis/breast-cancer/';
+          endpoint = 'http://127.0.0.1:8000/analysis/breast-cancer/';
           break;
         case 'oral-cancer':
-          endpoint = 'http://34.66.93.187/analysis/oral-cancer/';
+          endpoint = 'http://127.0.0.1:8000/analysis/oral-cancer/';
           break;
         default:
           throw new Error('Invalid analysis type');
