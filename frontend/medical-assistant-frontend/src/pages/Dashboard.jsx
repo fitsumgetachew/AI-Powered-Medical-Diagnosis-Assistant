@@ -1,33 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Share2, X } from 'lucide-react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { Plus, Share2, X } from 'lucide-react';
+import './Dashboard.css';
 
-// Share Modal component
+// Modal component for doctor selection
 const ShareModal = ({ isOpen, onClose, doctors, onShare, analysisType, analysisId }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg w-full max-w-md">
-        <div className="flex justify-between items-center p-4 border-b">
-          <h3 className="text-lg font-semibold">Share with Doctor</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+    <div className="modal-overlay">
+      <div className="modal">
+        <div className="modal-header">
+          <h3>Share with Doctor</h3>
+          <button onClick={onClose} className="close-button">
             <X size={20} />
           </button>
         </div>
-        <div className="p-4">
-          <p className="mb-4 text-gray-600">Select a doctor to share your {analysisType} analysis:</p>
-          <div className="space-y-3">
+        <div className="modal-content">
+          <p>Select a doctor to share your {analysisType} analysis:</p>
+          <div className="doctors-list">
             {doctors.map(doctor => (
               <button
                 key={doctor.user_id}
+                className="doctor-item"
                 onClick={() => onShare(doctor.user_id, analysisId)}
-                className="w-full text-left p-3 border rounded-lg hover:bg-gray-50 transition-colors"
               >
-                <h4 className="font-semibold">{doctor.name}</h4>
-                <p className="text-sm text-gray-600">{doctor.specialization}</p>
-                <span className="text-xs text-gray-500">Experience: {doctor.years_of_experience} years</span>
+                <h4>{doctor.name}</h4>
+                <p>{doctor.specialization}</p>
+                <span>Experience: {doctor.years_of_experience} years</span>
               </button>
             ))}
           </div>
@@ -36,112 +36,62 @@ const ShareModal = ({ isOpen, onClose, doctors, onShare, analysisType, analysisI
     </div>
   );
 };
-// Detail Modal component
-const DetailModal = ({ isOpen, onClose, data, type }) => {
-  if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center p-4 border-b">
-          <h3 className="text-lg font-semibold">
-            {type === 'image' && 'Image Analysis Details'}
-            {type === 'symptom' && 'Symptom Analysis Details'}
-            {type === 'prescription' && 'Prescription Details'}
-          </h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-            <X size={20} />
-          </button>
+const AnalysisBox = ({ item, type, onShareClick }) => (
+  <div className="analysis-box">
+    {type === 'symptom' && (
+      <>
+        <div className="box-date">{new Date(item.created_at).toLocaleDateString()}</div>
+        <div className="box-content">
+          {item.symptom_analysis.symptoms.map(symptom => (
+            <span key={symptom.id} className="symptom-tag">{symptom.name}</span>
+          ))}
         </div>
-        <div className="p-4">
-          {type === 'image' && (
-            <>
-              <p className="mb-2"><span className="font-semibold">Type:</span> {data.medical_image.image_type}</p>
-              <p className="mb-2"><span className="font-semibold">Body Part:</span> {data.medical_image.body_part}</p>
-              <p className="mb-2"><span className="font-semibold">Result:</span> {data.result}</p>
-              <p className="mb-2"><span className="font-semibold">Abnormality Detected:</span> {data.abnormality_detected ? 'Yes' : 'No'}</p>
-              <p><span className="font-semibold">Confidence Score:</span> {(data.confidence_score * 100).toFixed(2)}%</p>
-            </>
-          )}
-          {type === 'symptom' && (
-            <>
-              <div className="mb-4">
-                <h4 className="font-semibold mb-2">Symptoms:</h4>
-                <ul className="list-disc pl-5">
-                  {data.symptom_analysis.symptoms.map(symptom => (
-                    <li key={symptom.id} className="mb-1">{symptom.name}</li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-2">Analysis Result:</h4>
-                <p className="text-gray-700">{data.symptom_analysis.analysis_result}</p>
-              </div>
-            </>
-          )}
-          {type === 'prescription' && (
-            <>
-              <p className="mb-2"><span className="font-semibold">Diagnosis:</span> {data.diagnosis}</p>
-              <p className="mb-2"><span className="font-semibold">Dosage:</span> {data.dosage}</p>
-              <p className="mb-2"><span className="font-semibold">Frequency:</span> {data.frequency}</p>
-              <p className="mb-2"><span className="font-semibold">Duration:</span> {data.duration}</p>
-              <p className="mb-2"><span className="font-semibold">Instructions:</span> {data.instructions}</p>
-              <p><span className="font-semibold">Created:</span> {new Date(data.created_at).toLocaleDateString()}</p>
-            </>
-          )}
+      </>
+    )}
+    {type === 'image' && (
+      <>
+        <div className="box-date">{item.date}</div>
+        <div className="box-content">
+          <div className="image-type">{item.type}</div>
+          <div className="image-result">{item.result}</div>
         </div>
-      </div>
+      </>
+    )}
+    {type === 'prescription' && (
+      <>
+        <div className="box-date">{item.date}</div>
+        <div className="box-content">
+          <div className="prescription-med">{item.medication}</div>
+          <div className="prescription-dosage">{item.dosage}</div>
+        </div>
+      </>
+    )}
+    <button onClick={() => onShareClick(item.id, type)} className="share-button">
+      <Share2 size={16} />
+      Share with Doctor
+    </button>
+  </div>
+);
+
+const AnalysisSection = ({ title, items, type, ctaLink, onShareClick }) => (
+  <div className="analysis-section">
+    <div className="section-header">
+      <h2>{title}</h2>
+      <a href={ctaLink} className="new-analysis-button">
+        <Plus size={16} />
+        New Analysis
+      </a>
     </div>
-  );
-};
-
-// Share Modal component (keep your existing ShareModal component)
-
-const AnalysisBox = ({ item, type, onShareClick, isAddNew, onBoxClick }) => {
-  const navigate = useNavigate();
-
-  if (isAddNew) {
-    const getRedirectPath = () => {
-      switch (type) {
-        case 'image':
-          return '/medical-image';
-        case 'symptom':
-          return '/symptom-analysis';
-        case 'prescription':
-          return '/prescription';
-        default:
-          return '/';
-      }
-    };
-
-    return (
-      <button
-        onClick={() => navigate(getRedirectPath())}
-        className="h-full min-h-[200px] border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center p-4 hover:border-blue-500 hover:bg-blue-50 transition-colors group"
-      >
-        <Plus size={24} className="text-gray-400 group-hover:text-blue-500 mb-2" />
-        <span className="text-gray-500 group-hover:text-blue-600 font-medium">New {type}</span>
-      </button>
-    );
-  }
-
-  // ... rest of AnalysisBox component remains the same ...
-};
-
-const AnalysisSection = ({ title, items = [], type, onShareClick, onBoxClick }) => (
-  <div className="mb-8">
-    <h2 className="text-2xl font-bold mb-4 text-gray-800">{title}</h2>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {items.slice(0, 3).map((item, index) => (
+    <div className="boxes-container">
+      {items.map((item, index) => (
         <AnalysisBox
           key={index}
           item={item}
           type={type}
           onShareClick={onShareClick}
-          onBoxClick={onBoxClick}
         />
       ))}
-      <AnalysisBox isAddNew type={type} />
     </div>
   </div>
 );
@@ -151,54 +101,53 @@ function Dashboard() {
   const [symptomAnalyses, setSymptomAnalyses] = useState([]);
   const [prescriptions, setPrescriptions] = useState([]);
   const [doctors, setDoctors] = useState([]);
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAnalysis, setSelectedAnalysis] = useState(null);
-  const [detailModalData, setDetailModalData] = useState(null);
-  const [detailModalType, setDetailModalType] = useState(null);
+
+  const fetchDoctors = async () => {
+    try {
+      const accessToken = localStorage.getItem('access_token');
+      const response = await axios.get('http://127.0.0.1:8000/history/list-doctors/', {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      setDoctors(response.data);
+    } catch (error) {
+      console.error('Error fetching doctors:', error);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       const accessToken = localStorage.getItem('access_token');
-      const config = {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
+      const headers = {
+        Authorization: `Bearer ${accessToken}`
       };
 
-      // Fetch image analyses
       try {
-        const imageResponse = await axios.get('http://127.0.0.1:8000/analysis/results/', config);
-        setImageAnalyses(imageResponse.data);
-      } catch (error) {
-        console.error('Error fetching image analyses:', error);
-        setImageAnalyses([]);
-      }
-
-      // Fetch symptom analyses
-      try {
-        const symptomResponse = await axios.get('http://127.0.0.1:8000/history/symptom-analysis/', config);
+        // Fetch symptom analyses
+        const symptomResponse = await axios.get(
+          'http://127.0.0.1:8000/history/symptom-analysis/',
+          { headers }
+        );
         setSymptomAnalyses(symptomResponse.data);
-      } catch (error) {
-        console.error('Error fetching symptom analyses:', error);
-        setSymptomAnalyses([]);
-      }
 
-      // Fetch prescriptions
-      try {
-        const prescriptionResponse = await axios.get('http://127.0.0.1:8000/prescriptions/prescriptions/', config);
-        setPrescriptions(prescriptionResponse.data);
-      } catch (error) {
-        console.error('Error fetching prescriptions:', error);
-        setPrescriptions([]);
-      }
+        // Fetch doctors
+        await fetchDoctors();
 
-      // Fetch doctors
-      try {
-        const doctorsResponse = await axios.get('http://127.0.0.1:8000/history/list-doctors/', config);
-        setDoctors(doctorsResponse.data);
+        // Sample data for image analyses and prescriptions
+        setImageAnalyses([
+          { id: 1, date: '2024-09-25', type: 'X-ray', result: 'Normal chest X-ray' },
+          { id: 2, date: '2024-09-20', type: 'MRI', result: 'No significant findings' },
+          { id: 3, date: '2024-09-15', type: 'CT Scan', result: 'Minor abnormalities detected' }
+        ]);
+
+        setPrescriptions([
+          { id: 1, date: '2024-09-26', medication: 'Amoxicillin', dosage: '500mg, 3x daily' },
+          { id: 2, date: '2024-09-21', medication: 'Ibuprofen', dosage: '400mg as needed' },
+          { id: 3, date: '2024-09-18', medication: 'Loratadine', dosage: '10mg daily' }
+        ]);
       } catch (error) {
-        console.error('Error fetching doctors:', error);
-        setDoctors([]);
+        console.error('Error fetching data:', error);
       }
     };
 
@@ -207,12 +156,7 @@ function Dashboard() {
 
   const handleShareClick = (analysisId, type) => {
     setSelectedAnalysis({ id: analysisId, type });
-    setIsShareModalOpen(true);
-  };
-
-  const handleBoxClick = (item, type) => {
-    setDetailModalData(item);
-    setDetailModalType(type);
+    setIsModalOpen(true);
   };
 
   const handleShare = async (doctorUserId, analysisId) => {
@@ -228,7 +172,8 @@ function Dashboard() {
           headers: { Authorization: `Bearer ${accessToken}` }
         }
       );
-      setIsShareModalOpen(false);
+      // Close modal and show success message
+      setIsModalOpen(false);
       alert('Analysis shared successfully!');
     } catch (error) {
       console.error('Error sharing analysis:', error);
@@ -237,43 +182,36 @@ function Dashboard() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="dashboard-container">
       <AnalysisSection
         title="Medical Image Analyses"
         items={imageAnalyses}
         type="image"
+        ctaLink="/medical-image"
         onShareClick={handleShareClick}
-        onBoxClick={(item) => handleBoxClick(item, 'image')}
       />
       <AnalysisSection
         title="Symptom Analyses"
         items={symptomAnalyses}
         type="symptom"
+        ctaLink="/symptom-analysis"
         onShareClick={handleShareClick}
-        onBoxClick={(item) => handleBoxClick(item, 'symptom')}
       />
       <AnalysisSection
         title="Prescriptions"
         items={prescriptions}
         type="prescription"
+        ctaLink="/prescription"
         onShareClick={handleShareClick}
-        onBoxClick={(item) => handleBoxClick(item, 'prescription')}
       />
 
       <ShareModal
-        isOpen={isShareModalOpen}
-        onClose={() => setIsShareModalOpen(false)}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
         doctors={doctors}
         onShare={handleShare}
         analysisType={selectedAnalysis?.type}
         analysisId={selectedAnalysis?.id}
-      />
-
-      <DetailModal
-        isOpen={detailModalData !== null}
-        onClose={() => setDetailModalData(null)}
-        data={detailModalData}
-        type={detailModalType}
       />
     </div>
   );
