@@ -69,7 +69,7 @@ class ConversationListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        conversations = Conversation.objects.all()
+        conversations = Conversation.objects.filter(user = request.user)
         serializer = ConversationListSerializer(conversations, many=True)
         return Response(serializer.data)
 
@@ -89,6 +89,7 @@ class ConversationDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, conversation_id):
+
         conversation = get_object_or_404(Conversation, pk=conversation_id)
         serializer = ConversationDetailSerializer(conversation)
         return Response(serializer.data)
