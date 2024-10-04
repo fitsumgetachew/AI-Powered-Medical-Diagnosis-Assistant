@@ -27,6 +27,41 @@ from accounts.models import User
 
 from .serializers import MedicalImageSerializer, ImageAnalysisResultSerializer
 from ..utils import save_analysis_results
+import os
+""""
+===========================================================
+            DOWNLOADING THE ML MODELS FIRST
+===========================================================
+"""
+import gdown
+
+urls = [
+    "https://drive.google.com/uc?id=1xTZILxtFiLrhRUs40XhLFpWYiaA-ZRC6",  # First file ID
+    "https://drive.google.com/uc?id=1c7QsjL8OiVyptLlgQkpnslapX2lq-uij",   # Second file ID
+    "https://drive.google.com/uc?id=1JS6OhZz8ivchVUsoHTMDCEtqOia-PW-b",   # Third file ID
+    "https://drive.google.com/uc?id=1h5iuzEjww00DtxfxDGuwEg41j22nRq5-",   # Fourth file ID
+    "https://drive.google.com/uc?id=1XPTsoYHjUnNGlo3lXhCsmI0qjpb1Gb0h"    # Fifth file ID
+]
+
+# Local paths where the models will be saved
+outputs = ["MLmodels/bones.h5",
+           "MLmodels/pneumonia.h5",
+           "MLmodels/tuberculosis.h5",
+           "MLmodels/breast_cancer_classifier.h5",
+           "MLmodels/oral_cancer_classifier.h5"]
+
+# Create the directory if it doesn't exist
+os.makedirs("MLmodels", exist_ok=True)
+
+# Download each model from Google Drive
+for url, output in zip(urls, outputs):
+    # Check if the output file already exists
+    if os.path.exists(output):
+        print(f"{output} already exists. Skipping download.")
+    else:
+        gdown.download(url, output, quiet=False)
+        print(f"Downloaded {output}.")
+
 
 """
 ============================================================================
@@ -122,7 +157,7 @@ class TuberculosisTestView(APIView):
             medical_image = serializer.save()
 
             # Load the pre-trained model
-            model = tf.keras.models.load_model('/home/belvisk/Documents/models/tuberculosis.h5')
+            model = tf.keras.models.load_model('MLmodels/tuberculosis.h5')
 
             # Retrieve the uploaded file
             file = request.FILES['image']
@@ -233,7 +268,7 @@ class PneumoniaTestView(APIView):
             medical_image = serializer.save()
 
             # Load the pre-trained model
-            model = tf.keras.models.load_model('/home/belvisk/Documents/models/pneumonia.h5')
+            model = tf.keras.models.load_model('MLmodels/pneumonia.h5')
 
             # Retrieve the uploaded file
             file = request.FILES['image']
@@ -329,7 +364,7 @@ class BonesFractureTestView(APIView):
             medical_image = serializer.save()
 
             # Load the pre-trained model
-            model = tf.keras.models.load_model('/home/belvisk/Documents/models/bones.h5')
+            model = tf.keras.models.load_model('MLmodels/bones.h5')
 
             # Retrieve the uploaded file
             file = request.FILES['image']
@@ -419,7 +454,7 @@ class BreastCancerTestView(APIView):
             medical_image = serializer.save()
 
             # Load the pre-trained model
-            model = tf.keras.models.load_model('/home/belvisk/Documents/models/breast_cancer_classifier.h5')
+            model = tf.keras.models.load_model('MLmodels/breast_cancer_classifier.h5')
 
             # Retrieve the uploaded file
             file = request.FILES['image']
@@ -508,7 +543,7 @@ class OralCancerTestView(APIView):
             medical_image = serializer.save()
 
             # Load the pre-trained model
-            model = tf.keras.models.load_model('/home/belvisk/Documents/models/oral_cancer_model.h5')
+            model = tf.keras.models.load_model('MLmodels/oral_cancer_model.h5')
 
             # Retrieve the uploaded file
             file = request.FILES['image']
@@ -533,13 +568,11 @@ class OralCancerTestView(APIView):
 
         return Response(serializer.errors, status=400)
 
-
 """
 ============================================================================
                         VIEWS FOR USER DASHBOARD
 ============================================================================
 """
-
 
 class AnalysisResultsView(APIView):
     """

@@ -113,19 +113,24 @@ class PrescriptionListCreateAPIView(APIView):
                 # Check for drug interactions
                 drug_names = [drug.name for drug in drugs]
                 interaction_api = DrugInteractionAPIView()
-                request_data = {'prescription_drugs': drug_names}
-                response = interaction_api.post(request, request_data)
+                request.data['prescription_drugs'] = drug_names
+                response = interaction_api.post(request)
 
                 # Handle the interaction response
                 if response.status_code == status.HTTP_200_OK:
-                    interactions = response.data
+                    interactions = response.data.get('interactions')
                     # You can handle the interactions as needed, e.g., log them, notify the doctor, etc.
                     print("Drug interactions:", interactions)
+                    data = {
+                        'interactions': interactions,
+                        'prescription_data': serializer.data
+                    }
                 else:
                     # Handle the error case
                     print("Error checking drug interactions:", response.data)
+                    data = serializer.data
 
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response(data, status=status.HTTP_201_CREATED)
             except Exception as e:
                 return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -189,7 +194,7 @@ class DrugInteractionAPIView(APIView):
     API view to check for drug interactions using a medical LLM.
     """
 
-    def post(self, request, request_data):
+    def post(self, request):
         """
         Handle POST requests to check for drug interactions.
 
@@ -199,7 +204,8 @@ class DrugInteractionAPIView(APIView):
         Returns:
             Response: A Response object containing the interaction results and HTTP status code 200.
         """
-        prescription_drugs = request_data['prescription_drugs']
+        prescription_drugs = request.data.get('prescription_drugs')
+        print(prescription_drugs)
         interactions = self.check_interactions(prescription_drugs)
         return Response({'interactions':interactions}, status=status.HTTP_200_OK)
 

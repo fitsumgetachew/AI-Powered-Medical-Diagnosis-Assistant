@@ -1,98 +1,155 @@
 /* PrescriptionForm.css */
 
 .prescription-form-container {
-  max-width: 600px; /* Limit the width of the form */
-  margin: 0 auto; /* Center the form */
-  padding: 20px; /* Add padding */
-  background-color: #f9f9f9; /* Light background color */
-  border-radius: 8px; /* Rounded corners */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 h2 {
-  text-align: center; /* Center the title */
-  color: #333; /* Dark text color */
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  font-size: 2rem;
 }
 
 .prescription-form {
   display: flex;
-  flex-direction: column; /* Stack elements vertically */
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .form-group {
-  margin-bottom: 15px; /* Space between form groups */
+  display: flex;
+  flex-direction: column;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.form-row .form-group {
+  flex: 1;
 }
 
 label {
-  margin-bottom: 5px; /* Space between label and input */
-  font-weight: bold; /* Bold labels */
-  color: #555; /* Medium text color */
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #34495e;
 }
 
 .form-select,
 .form-input,
 .form-textarea {
-  width: 100%; /* Full width inputs */
-  padding: 10px; /* Padding inside inputs */
-  border: 1px solid #ccc; /* Light border */
-  border-radius: 4px; /* Rounded corners */
-  font-size: 14px; /* Font size */
-}
-
-.form-textarea {
-  resize: vertical; /* Allow vertical resizing */
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
 }
 
 .form-select:focus,
 .form-input:focus,
 .form-textarea:focus {
-  border-color: #007bff; /* Border color on focus */
-  outline: none; /* Remove default outline */
+  border-color: #3498db;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.button-group {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
 }
 
 .submit-button {
-  padding: 10px; /* Padding inside button */
-  background-color: #007bff; /* Primary button color */
-  color: white; /* White text */
-  border: none; /* Remove border */
-  border-radius: 4px; /* Rounded corners */
-  cursor: pointer; /* Pointer cursor on hover */
-  font-size: 16px; /* Font size */
-  margin-top: 10px; /* Space above button */
+  padding: 0.75rem 2rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  background-color: #3498db;
+  color: white;
 }
 
 .submit-button:hover {
-  background-color: #0056b3; /* Darker blue on hover */
+  background-color: #2980b9;
 }
 
-.check-interaction-button {
-  padding: 10px; /* Padding inside button */
-  background-color: #28a745; /* Success button color */
-  color: white; /* White text */
-  border: none; /* Remove border */
-  border-radius: 4px; /* Rounded corners */
-  cursor: pointer; /* Pointer cursor on hover */
-  font-size: 16px; /* Font size */
-  margin-top: 10px; /* Space above button */
+.loading {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #7f8c8d;
+  margin-top: 2rem;
 }
 
-.check-interaction-button:hover {
-  background-color: #218838; /* Darker green on hover */
-}
-
-.interaction-result {
-  margin-top: 20px; /* Space above interaction result */
-  padding: 10px; /* Padding inside result */
-  border: 1px solid #ccc; /* Light border */
-  border-radius: 4px; /* Rounded corners */
-  background-color: #fff; /* White background for result */
-}
 .error-message {
-    color: red;
-    margin-bottom: 20px;
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
 }
 
-.error-details {
-    font-size: 0.9em;
-    color: darkred;
+.success-message {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+/* Popup styles */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.popup-content {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.popup-content h3 {
+  margin-top: 0;
+  color: #2c3e50;
+}
+
+.popup-content button {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.popup-content button:hover {
+  background-color: #2980b9;
 }

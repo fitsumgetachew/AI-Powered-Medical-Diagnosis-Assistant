@@ -1,0 +1,45 @@
+version: '3'
+
+services:
+  # Django Backend
+  backend:
+    build: ./medical_diagnosis_assistant
+    container_name: django_app
+    command: gunicorn --bind 0.0.0.0:8000 medical_diagnosis_assistant.wsgi:application
+    volumes:
+      - ./medical_diagnosis_assistant:/app
+    ports:
+      - "8000:8000"  # This exposes the backend to the host
+    env_file:
+      - ./medical_diagnosis_assistant/.env  # Optional, if you want to use environment variables
+    networks:
+      - app-network
+
+  # React Frontend
+  frontend:
+    build: ./frontend/
+    container_name: react_app
+    volumes:
+      - ./frontend/dist:/usr/share/nginx/html
+    ports:
+      - "80:80"
+    networks:
+      - app-network
+
+  # Nginx (reverse proxy)
+  nginx:
+    image: nginx:alpine
+    container_name: nginx_proxy
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
