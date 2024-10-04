@@ -25,7 +25,7 @@ from PIL import Image
 from ..models import MedicalImage, ImageAnalysisResult
 from accounts.models import User
 
-from .serializers import MedicalImageSerializer, ImageAnalysisResultSerializer
+from .serializers import MedicalImageSerializer, ImageAnalysisResultSerializer , ImageAnalysisVisualizationSerializer
 from ..utils import save_analysis_results
 import os
 """"
@@ -595,7 +595,7 @@ class AnalysisResultsView(APIView):
         user = 1
         try:
             # Retrieve medical images for the authenticated user
-            medical_images = MedicalImage.objects.filter(user=user)
+            medical_images = MedicalImage.objects.all()
 
             if not medical_images.exists():
                 return Response({'message': 'No medical images found for this user.'}, status=404)
@@ -646,3 +646,8 @@ class AnalysisResultDetailView(APIView):
         except Exception as e:
             return Response({'error': str(e)}, status=500)
 
+
+from rest_framework import generics
+class ImageAnalysisVisualizationView(generics.ListAPIView):
+    queryset = ImageAnalysisResult.objects.all()
+    serializer_class = ImageAnalysisVisualizationSerializer
