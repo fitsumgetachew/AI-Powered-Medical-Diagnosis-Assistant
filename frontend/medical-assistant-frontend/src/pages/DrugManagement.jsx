@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import './DrugManagement.css'; // Import the CSS file
+import './DrugManagement.css';
 
 const DrugManagement = () => {
   const [formData, setFormData] = useState({
@@ -9,8 +9,8 @@ const DrugManagement = () => {
     side_effects: '',
     contraindications: ''
   });
-  const [error, setError] = useState(null); // State to store error messages
-  const [errorDetails, setErrorDetails] = useState(''); // State for detailed error messages
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
   const handleInputChange = (e) => {
     setFormData({
@@ -23,49 +23,72 @@ const DrugManagement = () => {
     e.preventDefault();
     try {
       await axios.post('http://127.0.0.1:8000/prescriptions/drugs/', formData);
-      alert('Drug added successfully');
+      setSuccess(true);
       setFormData({
         name: '',
         description: '',
         side_effects: '',
         contraindications: ''
       });
-      setError(null); // Clear error message on successful submission
+      setError(null);
+      setTimeout(() => setSuccess(false), 3000);
     } catch (error) {
       console.error('Error adding drug:', error);
-      setError('Failed to add drug. Please try again.'); // General error message
-      setErrorDetails(error.response?.data?.detail || error.message); // Detailed error message
+      setError(error.response?.data?.detail || 'Failed to add drug. Please try again.');
+      setSuccess(false);
     }
   };
 
   return (
     <div className="drug-management-container">
       <h2>Add New Drug</h2>
-
-      {/* Error message display */}
-      {error && (
-        <div className="error-message">
-          <p>{error}</p>
-          {errorDetails && <p className="error-details">{errorDetails}</p>} {/* Detailed error info */}
-        </div>
-      )}
-
+      {error && <div className="error-message">{error}</div>}
+      {success && <div className="success-message">Drug added successfully!</div>}
       <form className="drug-form" onSubmit={handleSubmit}>
         <div className="form-group">
-          <label>Name:</label>
-          <input type="text" name="name" value={formData.name} onChange={handleInputChange} className="form-input" />
+          <label htmlFor="name">Name:</label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            className="form-input"
+            required
+          />
         </div>
         <div className="form-group">
-          <label>Description:</label>
-          <textarea name="description" value={formData.description} onChange={handleInputChange} className="form-input" />
+          <label htmlFor="description">Description:</label>
+          <textarea
+            id="description"
+            name="description"
+            value={formData.description}
+            onChange={handleInputChange}
+            className="form-input"
+            required
+          />
         </div>
         <div className="form-group">
-          <label>Side Effects:</label>
-          <textarea name="side_effects" value={formData.side_effects} onChange={handleInputChange} className="form-input" />
+          <label htmlFor="side_effects">Side Effects:</label>
+          <textarea
+            id="side_effects"
+            name="side_effects"
+            value={formData.side_effects}
+            onChange={handleInputChange}
+            className="form-input"
+            required
+          />
         </div>
         <div className="form-group">
-          <label>Contraindications:</label>
-          <textarea name="contraindications" value={formData.contraindications} onChange={handleInputChange} className="form-input" />
+          <label htmlFor="contraindications">Contraindications:</label>
+          <textarea
+            id="contraindications"
+            name="contraindications"
+            value={formData.contraindications}
+            onChange={handleInputChange}
+            className="form-input"
+            required
+          />
         </div>
         <button type="submit" className="submit-button">Add Drug</button>
       </form>

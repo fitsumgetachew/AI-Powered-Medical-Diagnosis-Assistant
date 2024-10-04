@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './PrescriptionForm.css'; // Import the custom styles
+import './PrescriptionForm.css';
 
 const PrescriptionForm = () => {
   const [patients, setPatients] = useState([]);
@@ -14,11 +14,10 @@ const PrescriptionForm = () => {
     duration: '',
     instructions: ''
   });
-  const [interactionResult, setInteractionResult] = useState('');
-  const [loadingPatients, setLoadingPatients] = useState(true);
-  const [loadingDrugs, setLoadingDrugs] = useState(true);
+  const [loading, setLoading] = useState({ patients: true, drugs: true });
   const [error, setError] = useState(null);
-  const [errorDetails, setErrorDetails] = useState('');
+  const [success, setSuccess] = useState(false);
+  const [interactionPopup, setInteractionPopup] = useState({ isOpen: false, content: '' });
 
   useEffect(() => {
     fetchPatients();
@@ -29,13 +28,11 @@ const PrescriptionForm = () => {
     try {
       const response = await axios.get('http://127.0.0.1:8000/users/list');
       setPatients(response.data);
-      console.log(response.data);
-      setLoadingPatients(false);
+      setLoading(prev => ({ ...prev, patients: false }));
     } catch (error) {
       console.error('Error fetching patients:', error);
       setError('Failed to fetch patients. Please try again later.');
-      setErrorDetails(error.response?.data?.detail || error.message);
-      setLoadingPatients(false);
+      setLoading(prev => ({ ...prev, patients: false }));
     }
   };
 
@@ -43,20 +40,16 @@ const PrescriptionForm = () => {
     try {
       const response = await axios.get('http://127.0.0.1:8000/prescriptions/drugs/');
       setDrugs(response.data);
-      setLoadingDrugs(false);
+      setLoading(prev => ({ ...prev, drugs: false }));
     } catch (error) {
       console.error('Error fetching drugs:', error);
       setError('Failed to fetch drugs. Please try again later.');
-      setErrorDetails(error.response?.data?.detail || error.message);
-      setLoadingDrugs(false);
+      setLoading(prev => ({ ...prev, drugs: false }));
     }
   };
 
   const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleDrugSelection = (e) => {
@@ -67,61 +60,48 @@ const PrescriptionForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://127.0.0.1:8000/prescriptions/prescriptions/', formData);
-      alert('Prescription saved successfully');
+      const response = await axios.post('http://127.0.0.1:8000/prescriptions/prescriptions/', formData);
+      setSuccess(true);
+      setInteractionPopup({ isOpen: true, content: response.data.interactions });
+      setTimeout(() => setSuccess(false), 3000);
     } catch (error) {
       console.error('Error saving prescription:', error);
       setError('Failed to save prescription. Please check your input and try again.');
-      setErrorDetails(error.response?.data?.detail || error.message);
     }
   };
 
-  const checkDrugInteractions = async () => {
-    try {
-      const response = await axios.post('http://127.0.0.1:8000/prescriptions/drug-interactions/', { prescription_drugs: formData.drugs });
-      setInteractionResult(response.data.interactions);
-    } catch (error) {
-      console.error('Error checking drug interactions:', error);
-      setInteractionResult('Error checking interactions. Please try again later.');
-      setErrorDetails(error.response?.data?.detail || error.message);
-    }
-  };
-
-  if (loadingPatients || loadingDrugs) {
-    return <div>Loading...</div>;
+  if (loading.patients || loading.drugs) {
+    return <div className="loading">Loading...</div>;
   }
 
   return (
     <div className="prescription-form-container">
       <h2>Create Prescription</h2>
 
-      {/* Error message display */}
-      {error && (
-        <div className="error-message">
-          <p>{error}</p>
-          {errorDetails && <p className="error-details">{errorDetails}</p>} {/* Display detailed error info */}
-        </div>
-      )}
+      {error && <div className="error-message">{error}</div>}
+      {success && <div className="success-message">Prescription saved successfully</div>}
 
       <form onSubmit={handleSubmit} className="prescription-form">
         <div className="form-group">
-          <label>Patient:</label>
-          <select name="patient" value={formData.patient} onChange={handleInputChange} className="form-select">
+          <label htmlFor="patient">Patient:</label>
+          <select id="patient" name="patient" value={formData.patient} onChange={handleInputChange} className="form-select">
             <option value="">Select Patient</option>
             {patients.map((patient) => (
               <option key={patient.id} value={patient.id}>
-                {patient.first_name} {patient.last_name}  {/* Use first_name and last_name */}
+                {patient.first_name} {patient.last_name}
               </option>
             ))}
           </select>
         </div>
+
         <div className="form-group">
-          <label>Diagnosis:</label>
-          <textarea name="diagnosis" value={formData.diagnosis} onChange={handleInputChange} className="form-textarea" />
+          <label htmlFor="diagnosis">Diagnosis:</label>
+          <textarea id="diagnosis" name="diagnosis" value={formData.diagnosis} onChange={handleInputChange} className="form-textarea" />
         </div>
+
         <div className="form-group">
-          <label>Drugs:</label>
-          <select name="drugs" multiple={true} value={formData.drugs} onChange={handleDrugSelection} className="form-select">
+          <label htmlFor="drugs">Drugs:</label>
+          <select id="drugs" name="drugs" multiple={true} value={formData.drugs} onChange={handleDrugSelection} className="form-select">
             {drugs.map((drug) => (
               <option key={drug.id} value={drug.id}>
                 {drug.name}
@@ -129,32 +109,41 @@ const PrescriptionForm = () => {
             ))}
           </select>
         </div>
-        <div className="form-group">
-          <label>Dosage:</label>
-          <input type="text" name="dosage" value={formData.dosage} onChange={handleInputChange} className="form-input" />
-        </div>
-        <div className="form-group">
-          <label>Frequency:</label>
-          <input type="text" name="frequency" value={formData.frequency} onChange={handleInputChange} className="form-input" />
-        </div>
-        <div className="form-group">
-          <label>Duration:</label>
-          <input type="text" name="duration" value={formData.duration} onChange={handleInputChange} className="form-input" />
-        </div>
-        <div className="form-group">
-          <label>Instructions:</label>
-          <textarea name="instructions" value={formData.instructions} onChange={handleInputChange} className="form-textarea" />
+
+        <div className="form-row">
+          <div className="form-group">
+            <label htmlFor="dosage">Dosage:</label>
+            <input id="dosage" type="text" name="dosage" value={formData.dosage} onChange={handleInputChange} className="form-input" />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="frequency">Frequency:</label>
+            <input id="frequency" type="text" name="frequency" value={formData.frequency} onChange={handleInputChange} className="form-input" />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="duration">Duration:</label>
+            <input id="duration" type="text" name="duration" value={formData.duration} onChange={handleInputChange} className="form-input" />
+          </div>
         </div>
 
-        <button type="submit" className="submit-button">Save Prescription</button>
+        <div className="form-group">
+          <label htmlFor="instructions">Instructions:</label>
+          <textarea id="instructions" name="instructions" value={formData.instructions} onChange={handleInputChange} className="form-textarea" />
+        </div>
+
+        <div className="button-group">
+          <button type="submit" className="submit-button">Save Prescription</button>
+        </div>
       </form>
 
-      <button onClick={checkDrugInteractions} className="check-interaction-button">Check Drug Interactions</button>
-
-      {interactionResult && (
-        <div className="interaction-result">
-          <h3>Drug Interaction Result:</h3>
-          <p>{interactionResult}</p>
+      {interactionPopup.isOpen && (
+        <div className="popup-overlay">
+          <div className="popup-content">
+            <h3>Drug Interaction Information</h3>
+            <p>{interactionPopup.content}</p>
+            <button onClick={() => setInteractionPopup(prev => ({ ...prev, isOpen: false }))}>Close</button>
+          </div>
         </div>
       )}
     </div>

@@ -1,66 +1,102 @@
 /* DrugManagement.css */
 
 .drug-management-container {
-  max-width: 600px; /* Limit the width of the form */
-  margin: 0 auto; /* Center the form */
-  padding: 20px; /* Add padding */
-  background-color: #f9f9f9; /* Light background color */
-  border-radius: 8px; /* Rounded corners */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 h2 {
-  text-align: center; /* Center the title */
-  color: #333; /* Dark text color */
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  font-size: 2rem;
 }
 
 .drug-form {
   display: flex;
-  flex-direction: column; /* Stack elements vertically */
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .form-group {
-  margin-bottom: 15px; /* Space between form groups */
+  display: flex;
+  flex-direction: column;
 }
 
 label {
-  margin-bottom: 5px; /* Space between label and input */
-  font-weight: bold; /* Bold labels */
-  color: #555; /* Medium text color */
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #34495e;
 }
 
 .form-input {
-  width: 100%; /* Full width inputs */
-  padding: 10px; /* Padding inside inputs */
-  border: 1px solid #ccc; /* Light border */
-  border-radius: 4px; /* Rounded corners */
-  font-size: 14px; /* Font size */
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
 }
 
 .form-input:focus {
-  border-color: #007bff; /* Border color on focus */
-  outline: none; /* Remove default outline */
+  border-color: #3498db;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+textarea.form-input {
+  resize: vertical;
+  min-height: 100px;
 }
 
 .submit-button {
-  padding: 10px; /* Padding inside button */
-  background-color: #007bff; /* Primary button color */
-  color: white; /* White text */
-  border: none; /* Remove border */
-  border-radius: 4px; /* Rounded corners */
-  cursor: pointer; /* Pointer cursor on hover */
-  font-size: 16px; /* Font size */
+  padding: 0.75rem 2rem;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  align-self: center;
 }
 
 .submit-button:hover {
-  background-color: #0056b3; /* Darker blue on hover */
-}
-.error-message {
-    color: red;
-    margin-bottom: 20px;
+  background-color: #2980b9;
 }
 
-.error-details {
-    font-size: 0.9em;
-    color: darkred;
+.error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.success-message {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+  .drug-management-container {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  .submit-button {
+    width: 100%;
+  }
 }
