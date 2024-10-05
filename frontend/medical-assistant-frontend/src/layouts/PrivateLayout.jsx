@@ -1,13 +1,14 @@
 import React from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import './PrivateLayout.css';
 
 const PrivateLayout = ({ children }) => {
   return (
-    <div className="private-layout">
+    <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="main-content">{children}</main>
+      <main className="flex-1 container mx-auto px-4 py-8">
+        {children}
+      </main>
       <Footer />
     </div>
   );
