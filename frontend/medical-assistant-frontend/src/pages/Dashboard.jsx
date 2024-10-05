@@ -213,7 +213,6 @@ const AnalysisSection = ({ title, items = [], type, onShareClick, onBoxClick }) 
 );
 
 function Dashboard() {
-  // State and useEffect remain the same
   const [imageAnalyses, setImageAnalyses] = useState([]);
   const [symptomAnalyses, setSymptomAnalyses] = useState([]);
   const [prescriptions, setPrescriptions] = useState([]);
@@ -232,34 +231,30 @@ function Dashboard() {
         }
       };
 
-      // Fetch image analyses
       try {
         const imageResponse = await axios.get('http://127.0.0.1:8000/analysis/results/', config);
-        setImageAnalyses(imageResponse.data);
+        setImageAnalyses(imageResponse.data.reverse());
       } catch (error) {
         console.error('Error fetching image analyses:', error);
         setImageAnalyses([]);
       }
 
-      // Fetch symptom analyses
       try {
         const symptomResponse = await axios.get('http://127.0.0.1:8000/history/symptom-analysis/', config);
-        setSymptomAnalyses(symptomResponse.data);
+        setSymptomAnalyses(symptomResponse.data.reverse());
       } catch (error) {
         console.error('Error fetching symptom analyses:', error);
         setSymptomAnalyses([]);
       }
 
-      // Fetch prescriptions
       try {
         const prescriptionResponse = await axios.get('http://127.0.0.1:8000/prescriptions/prescriptions/', config);
-        setPrescriptions(prescriptionResponse.data);
+        setPrescriptions(prescriptionResponse.data.reverse());
       } catch (error) {
         console.error('Error fetching prescriptions:', error);
         setPrescriptions([]);
       }
 
-      // Fetch doctors
       try {
         const doctorsResponse = await axios.get('http://127.0.0.1:8000/history/list-doctors/', config);
         setDoctors(doctorsResponse.data);
