@@ -2,6 +2,121 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Share2, X } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell } from 'recharts';
+
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+
+const AnalyticsSection = ({ visualData }) => {
+  // Process data for image type distribution
+  const imageTypeData = visualData.reduce((acc, curr) => {
+    acc[curr.image_type] = (acc[curr.image_type] || 0) + 1;
+    return acc;
+  }, {});
+
+  const imageTypeChartData = Object.entries(imageTypeData).map(([type, count]) => ({
+    name: type,
+    count: count
+  }));
+
+  // Process data for body part distribution
+  const bodyPartData = visualData.reduce((acc, curr) => {
+    acc[curr.body_part] = (acc[curr.body_part] || 0) + 1;
+    return acc;
+  }, {});
+
+  const bodyPartChartData = Object.entries(bodyPartData).map(([part, count]) => ({
+    name: part,
+    value: count
+  }));
+
+  // Process data for abnormality detection
+  const abnormalityData = visualData.reduce((acc, curr) => {
+    const key = curr.abnormality_detected ? 'Abnormal' : 'Normal';
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+
+  const abnormalityChartData = Object.entries(abnormalityData).map(([status, count]) => ({
+    name: status,
+    value: count
+  }));
+
+  return (
+    <div className="mb-8">
+      <h2 className="text-2xl font-bold mb-4 text-gray-800">Analytics Overview</h2>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Image Type Distribution */}
+        <div className="bg-white p-4 rounded-lg shadow">
+          <h3 className="text-lg font-semibold mb-2">Image Type Distribution</h3>
+          <div className="h-64">
+            <BarChart
+              width={300}
+              height={250}
+              data={imageTypeChartData}
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis allowDecimals={false} />
+              <Tooltip />
+              <Bar dataKey="count" fill="#8884d8" />
+            </BarChart>
+          </div>
+        </div>
+
+        {/* Body Part Distribution */}
+        <div className="bg-white p-4 rounded-lg shadow">
+          <h3 className="text-lg font-semibold mb-2">Body Part Distribution</h3>
+          <div className="h-64">
+            <PieChart width={300} height={250}>
+              <Pie
+                data={bodyPartChartData}
+                cx={150}
+                cy={125}
+                innerRadius={60}
+                outerRadius={80}
+                fill="#8884d8"
+                paddingAngle={5}
+                dataKey="value"
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+              >
+                {bodyPartChartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </div>
+        </div>
+
+        {/* Abnormality Detection Distribution */}
+        <div className="bg-white p-4 rounded-lg shadow">
+          <h3 className="text-lg font-semibold mb-2">Abnormality Detection</h3>
+          <div className="h-64">
+            <PieChart width={300} height={250}>
+              <Pie
+                data={abnormalityChartData}
+                cx={150}
+                cy={125}
+                innerRadius={60}
+                outerRadius={80}
+                fill="#8884d8"
+                paddingAngle={5}
+                dataKey="value"
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+              >
+                {abnormalityChartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 // Detail Modal component
 const DetailModal = ({ isOpen, onClose, data, type }) => {
   if (!isOpen) return null;
@@ -222,6 +337,7 @@ function Dashboard() {
   const [selectedAnalysis, setSelectedAnalysis] = useState(null);
   const [detailModalData, setDetailModalData] = useState(null);
   const [detailModalType, setDetailModalType] = useState(null);
+  const [visualData, setVisualData] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -231,6 +347,14 @@ function Dashboard() {
           'Authorization': `Bearer ${accessToken}`
         }
       };
+      try {
+        // Fetch visualization data
+        const visualResponse = await axios.get('http://127.0.0.1:8000/analysis/visual_data', config);
+        setVisualData(visualResponse.data);
+      } catch (error) {
+        console.error('Error fetching visualization data:', error);
+        setVisualData([]);
+      }
 
       // Fetch image analyses
       try {
@@ -305,6 +429,16 @@ function Dashboard() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+        <AnalyticsSection visualData={visualData} />
+
+      {/* Your existing sections */}
+      <AnalysisSection
+        title="Medical Image Analyses"
+        items={imageAnalyses}
+        type="image"
+        onShareClick={handleShareClick}
+        onBoxClick={(item) => handleBoxClick(item, 'image')}
+      />
       <AnalysisSection
         title="Medical Image Analyses"
         items={imageAnalyses}
