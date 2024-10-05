@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Edit2, LogOut, Award, FileText, Clock } from 'lucide-react';
 import './AuthComponents.css'; // Import the stylesheet
+import { User, Edit2, LogOut, Award, FileText, Clock, Mail, Lock, UserPlus, Send, ArrowLeft } from 'lucide-react';
+
 
 const API_BASE_URL = 'http://localhost:8000/';
 
@@ -34,6 +35,7 @@ async function sendRequest(endpoint, method = 'GET', data = null) {
   }
 }
 
+
 // Login Component
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -43,13 +45,12 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await sendRequest('users/login/', 'POST', { email, password }); // Removed hardcoded URL
+      const response = await sendRequest('users/login/', 'POST', { email, password });
       if (response.ok) {
-        // Store tokens and user information
         localStorage.setItem('access_token', response.data.access);
         localStorage.setItem('refresh_token', response.data.refresh);
         localStorage.setItem('is_doctor', response.data.is_doctor);
-        localStorage.setItem('userInfo', JSON.stringify(response.data.user)); // Assuming you get user info in response
+        localStorage.setItem('userInfo', JSON.stringify(response.data.user));
         navigate('/dashboard');
       } else {
         alert('Login failed. Please check your credentials.');
@@ -60,27 +61,78 @@ const Login = () => {
   };
 
   return (
-    <div className="auth-form login-form">
-      <h2>Login</h2>
-      <form onSubmit={handleLogin}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit">Login</button>
-      </form>
-      <button className="forgot-button" onClick={() => navigate('/register')}>Register</button>
-      <button className="forgot-button" onClick={() => navigate('/forgot-password')}>Forgot Password</button>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8 flex flex-col justify-center">
+      <div className="max-w-md w-full mx-auto bg-white rounded-xl shadow-xl overflow-hidden">
+        <div className="px-8 py-10">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h2>
+            <p className="text-sm text-gray-600">Sign in to access your account</p>
+          </div>
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                Email Address
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Enter your email"
+                />
+              </div>
+            </div>
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="password"
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Enter your password"
+                />
+              </div>
+            </div>
+            <div>
+              <button
+                type="submit"
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
+              >
+                Sign In
+              </button>
+            </div>
+          </form>
+          <div className="mt-6 flex flex-col space-y-4">
+            <button
+              onClick={() => navigate('/register')}
+              className="w-full flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-lg text-indigo-700 bg-indigo-100 hover:bg-indigo-200 transition-colors duration-200"
+            >
+              <UserPlus className="w-5 h-5 mr-2" />
+              Create Account
+            </button>
+            <button
+              onClick={() => navigate('/forgot-password')}
+              className="text-sm text-indigo-600 hover:text-indigo-500 font-medium"
+            >
+              Forgot your password?
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
@@ -133,7 +185,7 @@ const Register = () => {
     const registrationData = {
       email: formData.email,
       password: formData.password,
-      confirm_password:formData.confirmPassword,
+      confirm_password: formData.confirmPassword,
       first_name: formData.firstName,
       last_name: formData.lastName,
       otp: formData.otp,
@@ -160,107 +212,217 @@ const Register = () => {
   };
 
   return (
-    <div className="auth-form register-form">
-      <h2>Register</h2>
-      <form onSubmit={handleRegister}>
-        <input
-          type="text"
-          name="firstName"
-          placeholder="First Name"
-          value={formData.firstName}
-          onChange={handleInputChange}
-          required
-        />
-        <input
-          type="text"
-          name="lastName"
-          placeholder="Last Name"
-          value={formData.lastName}
-          onChange={handleInputChange}
-          required
-        />
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleInputChange}
-          required
-        />
-        {!otpSent ? (
-          <button type="button" onClick={handleSendOtp}>Send OTP</button>
-        ) : (
-          <input
-            type="text"
-            name="otp"
-            placeholder="OTP"
-            value={formData.otp}
-            onChange={handleInputChange}
-            required
-          />
-        )}
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleInputChange}
-          required
-        />
-        <input
-          type="password"
-          name="confirmPassword"
-          placeholder="Confirm Password"
-          value={formData.confirmPassword}
-          onChange={handleInputChange}
-          required
-        />
-        <div className="checkbox-container">
-          <input
-            type="checkbox"
-            id="is_doctor"
-            name="isDoctor"
-            checked={formData.isDoctor}
-            onChange={handleInputChange}
-          />
-          <label htmlFor="is_doctor">I am a doctor</label>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-white rounded-xl shadow-xl overflow-hidden">
+          <div className="px-8 py-10">
+            <div className="flex items-center mb-8">
+              <button
+                onClick={() => navigate('/login')}
+                className="flex items-center text-indigo-600 hover:text-indigo-500 transition-colors duration-200"
+              >
+                <ArrowLeft className="w-5 h-5 mr-2" />
+                Back to Login
+              </button>
+            </div>
+            <div className="text-center mb-10">
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Create Your Account</h2>
+              <p className="text-sm text-gray-600">Join our medical platform</p>
+            </div>
+            <form onSubmit={handleRegister} className="space-y-6">
 
-        {formData.isDoctor && (
-          <div className="doctor-fields">
-            <input
-              type="text"
-              name="specialization"
-              placeholder="Specialization"
-              value={formData.specialization}
-              onChange={handleInputChange}
-              required
-            />
-            <input
-              type="text"
-              name="licenseNumber"
-              placeholder="License Number"
-              value={formData.licenseNumber}
-              onChange={handleInputChange}
-              required
-            />
-            <input
-              type="number"
-              name="yearsOfExperience"
-              placeholder="Years of Experience"
-              value={formData.yearsOfExperience}
-              onChange={handleInputChange}
-              required
-              min="0"
-            />
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
+                    First Name
+                  </label>
+                  <input
+                    type="text"
+                    name="firstName"
+                    id="firstName"
+                    required
+                    value={formData.firstName}
+                    onChange={handleInputChange}
+                    className="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Enter your first name"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    name="lastName"
+                    id="lastName"
+                    required
+                    value={formData.lastName}
+                    onChange={handleInputChange}
+                    className="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Enter your last name"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    name="email"
+                    id="email"
+                    required
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Enter your email"
+                  />
+                  {!otpSent && (
+                    <button
+                      type="button"
+                      onClick={handleSendOtp}
+                      className="absolute right-2 top-2 px-4 py-1 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
+                    >
+                      <Send className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {otpSent && (
+                <div>
+                  <label htmlFor="otp" className="block text-sm font-medium text-gray-700 mb-2">
+                    OTP
+                  </label>
+                  <input
+                    type="text"
+                    name="otp"
+                    id="otp"
+                    required
+                    value={formData.otp}
+                    onChange={handleInputChange}
+                    className="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Enter OTP"
+                  />
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    name="password"
+                    id="password"
+                    required
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    className="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Enter password"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                    Confirm Password
+                  </label>
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    id="confirmPassword"
+                    required
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
+                    className="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Confirm password"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="isDoctor"
+                  name="isDoctor"
+                  checked={formData.isDoctor}
+                  onChange={handleInputChange}
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                />
+                <label htmlFor="isDoctor" className="ml-2 block text-sm text-gray-700">
+                  I am a medical professional
+                </label>
+              </div>
+
+              {formData.isDoctor && (
+                <div className="space-y-6 border-t border-gray-200 pt-6">
+                  <div>
+                    <label htmlFor="specialization" className="block text-sm font-medium text-gray-700 mb-2">
+                      Specialization
+                    </label>
+                    <input
+                      type="text"
+                      name="specialization"
+                      id="specialization"
+                      required
+                      value={formData.specialization}
+                      onChange={handleInputChange}
+                      className="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                      placeholder="Enter your specialization"
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                    <div>
+                      <label htmlFor="licenseNumber" className="block text-sm font-medium text-gray-700 mb-2">
+                        License Number
+                      </label>
+                      <input
+                        type="text"
+                        name="licenseNumber"
+                        id="licenseNumber"
+                        required
+                        value={formData.licenseNumber}
+                        onChange={handleInputChange}
+                        className="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="Enter license number"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="yearsOfExperience" className="block text-sm font-medium text-gray-700 mb-2">
+                        Years of Experience
+                      </label>
+                      <input
+                        type="number"
+                        name="yearsOfExperience"
+                        id="yearsOfExperience"
+                        required
+                        min="0"
+                        value={formData.yearsOfExperience}
+                        onChange={handleInputChange}
+                        className="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="Enter years of experience"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <button
+                  type="submit"
+                  disabled={!otpSent}
+                  className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white ${
+                    otpSent ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-gray-400 cursor-not-allowed'
+                  } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200`}
+                >
+                  Create Account
+                </button>
+              </div>
+            </form>
           </div>
-        )}
-
-        <button type="submit" disabled={!otpSent}>Register</button>
-      </form>
-
-      <div className="login-link">
-        <p>Already have an account? <a href="/login">Log in</a></p>
+        </div>
       </div>
     </div>
   );

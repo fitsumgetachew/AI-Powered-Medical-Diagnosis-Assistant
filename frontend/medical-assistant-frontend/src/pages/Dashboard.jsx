@@ -2,40 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Share2, X } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
-// Share Modal component
-const ShareModal = ({ isOpen, onClose, doctors, onShare, analysisType, analysisId }) => {
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg w-full max-w-md">
-        <div className="flex justify-between items-center p-4 border-b">
-          <h3 className="text-lg font-semibold">Share with Doctor</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-            <X size={20} />
-          </button>
-        </div>
-        <div className="p-4">
-          <p className="mb-4 text-gray-600">Select a doctor to share your {analysisType} analysis:</p>
-          <div className="space-y-3">
-            {doctors.map(doctor => (
-              <button
-                key={doctor.user_id}
-                onClick={() => onShare(doctor.user_id, analysisId)}
-                className="w-full text-left p-3 border rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <h4 className="font-semibold">{doctor.name}</h4>
-                <p className="text-sm text-gray-600">{doctor.specialization}</p>
-                <span className="text-xs text-gray-500">Experience: {doctor.years_of_experience} years</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 // Detail Modal component
 const DetailModal = ({ isOpen, onClose, data, type }) => {
   if (!isOpen) return null;
@@ -95,7 +61,38 @@ const DetailModal = ({ isOpen, onClose, data, type }) => {
   );
 };
 
-// Share Modal component (keep your existing ShareModal component)
+const ShareModal = ({ isOpen, onClose, doctors, onShare, analysisType, analysisId }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg w-full max-w-md">
+        <div className="flex justify-between items-center p-4 border-b">
+          <h3 className="text-lg font-semibold">Share with Doctor</h3>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+            <X size={20} />
+          </button>
+        </div>
+        <div className="p-4">
+          <p className="mb-4 text-gray-600">Select a doctor to share your {analysisType} analysis:</p>
+          <div className="space-y-3">
+            {doctors.map(doctor => (
+              <button
+                key={doctor.user_id}
+                onClick={() => onShare(doctor.user_id, analysisId)}
+                className="w-full text-left p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <h4 className="font-semibold">{doctor.name}</h4>
+                <p className="text-sm text-gray-600">{doctor.specialization}</p>
+                <span className="text-xs text-gray-500">Experience: {doctor.years_of_experience} years</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const AnalysisBox = ({ item, type, onShareClick, isAddNew, onBoxClick }) => {
   const navigate = useNavigate();
@@ -125,7 +122,76 @@ const AnalysisBox = ({ item, type, onShareClick, isAddNew, onBoxClick }) => {
     );
   }
 
-  // ... rest of AnalysisBox component remains the same ...
+  const getContent = () => {
+    switch (type) {
+      case 'image':
+        return (
+          <>
+            <h3 className="text-lg font-semibold mb-2">{item.medical_image.image_type} Analysis</h3>
+            <p className="text-gray-600 mb-2">Body Part: {item.medical_image.body_part}</p>
+            <p className="text-gray-600 mb-2">Result: {item.result}</p>
+            <p className="text-gray-600">
+              Confidence: {(item.confidence_score * 100).toFixed(2)}%
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              {new Date(item.analyzed_at).toLocaleDateString()}
+            </p>
+          </>
+        );
+      case 'symptom':
+        return (
+          <>
+            <h3 className="text-lg font-semibold mb-2">Symptom Analysis</h3>
+            <div className="mb-2">
+              <p className="text-gray-600 font-medium">Symptoms:</p>
+              <ul className="list-disc pl-5">
+                {item.symptom_analysis.symptoms.slice(0, 2).map(symptom => (
+                  <li key={symptom.id} className="text-gray-600">{symptom.name}</li>
+                ))}
+                {item.symptom_analysis.symptoms.length > 2 && (
+                  <li className="text-gray-500">+ {item.symptom_analysis.symptoms.length - 2} more</li>
+                )}
+              </ul>
+            </div>
+            <p className="text-sm text-gray-500 mt-2">
+              {new Date(item.created_at).toLocaleDateString()}
+            </p>
+          </>
+        );
+      case 'prescription':
+        return (
+          <>
+            <h3 className="text-lg font-semibold mb-2">Prescription</h3>
+            <p className="text-gray-600 mb-2">Diagnosis: {item.diagnosis}</p>
+            <p className="text-gray-600 mb-1">Dosage: {item.dosage}</p>
+            <p className="text-gray-600 mb-1">Duration: {item.duration} days</p>
+            <p className="text-sm text-gray-500 mt-2">
+              {new Date(item.created_at).toLocaleDateString()}
+            </p>
+          </>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div
+      className="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition-shadow cursor-pointer relative"
+      onClick={() => onBoxClick(item)}
+    >
+      {getContent()}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onShareClick(item.id, type);
+        }}
+        className="absolute top-4 right-4 p-2 text-gray-500 hover:text-gray-700"
+      >
+        <Share2 size={20} />
+      </button>
+    </div>
+  );
 };
 
 const AnalysisSection = ({ title, items = [], type, onShareClick, onBoxClick }) => (
@@ -147,6 +213,7 @@ const AnalysisSection = ({ title, items = [], type, onShareClick, onBoxClick }) 
 );
 
 function Dashboard() {
+  // State and useEffect remain the same
   const [imageAnalyses, setImageAnalyses] = useState([]);
   const [symptomAnalyses, setSymptomAnalyses] = useState([]);
   const [prescriptions, setPrescriptions] = useState([]);
